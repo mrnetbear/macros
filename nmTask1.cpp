@@ -124,20 +124,21 @@ int interPoly(){
         }
     }
 
-    
-
+    //Draw original function
     TGraph* origin = new TGraph (100, x1, fx1);
     origin->SetMarkerStyle(20);
     origin->SetMarkerColor(kRed);
     origin->SetLineColor(kRed);
     origin->SetLineWidth(2);
 
+    //Draw based approximation
     TGraph* approxPol = new TGraph (100, x2, fx2);
     approxPol->SetMarkerStyle(30);
     approxPol->SetMarkerColor(kBlue);
     approxPol->SetLineColor(kBlue);
     approxPol->SetLineWidth(4);
 
+    //Draw Lagrange polynomial
     TGraph* approxLag = new TGraph (100, x3, fx3);
     approxLag->SetMarkerStyle(40);
     approxLag->SetMarkerColor(kGreen);
