@@ -136,7 +136,7 @@ int interPoly(){
     approxPol->SetMarkerStyle(30);
     approxPol->SetMarkerColor(kBlue);
     approxPol->SetLineColor(kBlue);
-    approxPol->SetLineWidth(4);
+    approxPol->SetLineWidth(8);
 
     //Draw Lagrange polynomial
     TGraph* approxLag = new TGraph (100, x3, fx3);
