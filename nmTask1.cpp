@@ -103,7 +103,6 @@ int interPoly(){
     std::cout << std::endl;
     std::cout << "=====================================================" << std::endl;
 
-    //Calculate Newton polynomial
 
     //Generate original function
     double x1 [100];
@@ -142,12 +141,27 @@ int interPoly(){
         }
     }
 
+    //Calculate Newton polynomial
+
+    double x4 [100];
+    double fx4 [100];
+    for (int i = 0; i < 100; i++){
+        x4[i] = 3.0/100.00 * i;
+        for (int j = 0; j < NUM_OF_NODS; j++){
+            double numerator = 1.0;
+            for (int k = 0; k < j; k++){
+                numerator *= (x4[i] - x(k,0));
+            }
+            fx4[i] += numerator * dividedDifferences[j][0]; // pow(x4[i] - x(j,0), j+1);
+        }
+    }
+
     //Draw original function
     TGraph* origin = new TGraph (100, x1, fx1);
     origin->SetMarkerStyle(20);
     origin->SetMarkerColor(kRed);
     origin->SetLineColor(kRed);
-    origin->SetLineWidth(2);
+    origin->SetLineWidth(10);
 
     //Draw based approximation
     TGraph* approxPol = new TGraph (100, x2, fx2);
@@ -161,8 +175,14 @@ int interPoly(){
     approxLag->SetMarkerStyle(40);
     approxLag->SetMarkerColor(kGreen);
     approxLag->SetLineColor(kGreen);
-    approxLag->SetLineWidth(3);
+    approxLag->SetLineWidth(6);
 
+    //Draw Newton Polynomial
+    TGraph* approxNewton = new TGraph (100, x4, fx4);
+    approxNewton->SetMarkerStyle(50);
+    approxNewton->SetMarkerColor(kOrange);
+    approxNewton->SetLineColor(kOrange);
+    approxNewton->SetLineWidth(3);
 
     origin->Draw();
     approxPol->Draw("same");
