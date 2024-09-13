@@ -184,9 +184,19 @@ int interPoly(){
     approxNewton->SetLineColor(kOrange);
     approxNewton->SetLineWidth(3);
 
+    TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations");
+    canvas1->SetGrid();
+
+    TLegend *legend = new TLegend(0.2, 0.2, 0.5, 0.5);
+    legend->SetHeader("Interpolation Functions","C");
+    legend->AddEntry(origin, "Original Function", "lp");
+    legend->AddEntry(approxPol, "Polynomial approx", "lp");
+    legend->AddEntry(approxLag, "Lagrange Polynomial", "lp");
+    legend->AddEntry(approxNewton, "Newton Polynomial", "lp");
+
     origin->Draw();
     approxPol->Draw("same");
     approxLag->Draw("same");
-    
+    legend->Draw();
     return 0;
 }
