@@ -95,7 +95,7 @@ int interPoly(){
     }
     for (int i = 0; i < NUM_OF_NODS; i++){
         for (int j =1; j <= i; j++){
-            dividedDifferences[i][j] = (dividedDifferences[i][j-1] - dividedDifferences[i-1][j])/(x(i,0)-x(i-j,0));
+            dividedDifferences[i][j] = (dividedDifferences[i][j-1] - dividedDifferences[i-1][j-1])/(x(i,0)-x(i-j,0));
             std::cout << " F[" << i << "," << j << "] = " << dividedDifferences[i][j];
         }
     }
@@ -152,8 +152,9 @@ int interPoly(){
             for (int k = 0; k < j; k++){
                 numerator *= (x4[i] - x(k,0));
             }
-            fx4[i] += numerator * dividedDifferences[j][0]; // pow(x4[i] - x(j,0), j+1);
+            fx4[i] += numerator * dividedDifferences[j][j]; // pow(x4[i] - x(j,0), j+1);   
         }
+        std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x4[i] << std::endl;
     }
 
     //Draw original function
@@ -161,14 +162,14 @@ int interPoly(){
     origin->SetMarkerStyle(20);
     origin->SetMarkerColor(kRed);
     origin->SetLineColor(kRed);
-    origin->SetLineWidth(10);
+    origin->SetLineWidth(14);
 
     //Draw based approximation
     TGraph* approxPol = new TGraph (100, x2, fx2);
     approxPol->SetMarkerStyle(30);
     approxPol->SetMarkerColor(kBlue);
     approxPol->SetLineColor(kBlue);
-    approxPol->SetLineWidth(8);
+    approxPol->SetLineWidth(10);
 
     //Draw Lagrange polynomial
     TGraph* approxLag = new TGraph (100, x3, fx3);
@@ -197,6 +198,7 @@ int interPoly(){
     origin->Draw();
     approxPol->Draw("same");
     approxLag->Draw("same");
+    approxNewton->Draw("same");
     legend->Draw();
     return 0;
 }
