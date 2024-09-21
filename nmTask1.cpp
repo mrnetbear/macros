@@ -21,7 +21,7 @@
 
 #define NUM_OF_NODS 7
 #define LEFT_NOD 0
-#define RIGHT_NOD 5
+#define RIGHT_NOD 3
 #define NUM_OF_POINTS 100
 
 int interPoly(){
@@ -38,7 +38,7 @@ int interPoly(){
 
     for (int i=0; i<NUM_OF_NODS; i++){
         A(i,0) = 1;
-        x(i,0) = right/(double)NUM_OF_NODS * i;
+        x(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS * i;
 
         f(i,0) = sin(x(i,0))*exp(-x(i,0));
         for (int j=1; j<NUM_OF_NODS; j++){
@@ -160,6 +160,15 @@ int interPoly(){
         std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x4[i] << std::endl;
     }
 
+    //Calculate difference between original and newton values
+
+    double xdiff[NUM_OF_POINTS];
+    double fdiff[NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        xdiff[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
+        fdiff[i] = abs(fx4[i] - fx1[i]);
+    }
+
     //Draw original function
     TGraph* origin = new TGraph (NUM_OF_POINTS, x1, fx1);
     origin->SetMarkerStyle(20);
@@ -188,8 +197,17 @@ int interPoly(){
     approxNewton->SetLineColor(kOrange);
     approxNewton->SetLineWidth(3);
 
-    TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations");
-    canvas1->SetGrid();
+    //Draw difference between original and newton values
+    TGraph* diff = new TGraph (NUM_OF_POINTS, xdiff, fdiff);
+    diff->SetMarkerStyle(60);
+    diff->SetMarkerColor(kBlack);
+    diff->SetLineColor(kBlack);
+    diff->SetLineWidth(2);
+
+    TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations", 600, 900);
+    canvas1->Divide(1, 2);
+    canvas1->cd(1);
+    gPad->SetGrid();
 
     TLegend *legend = new TLegend(0.2, 0.2, 0.5, 0.5);
     legend->SetHeader("Interpolation Functions","C");
@@ -203,5 +221,9 @@ int interPoly(){
     approxLag->Draw("same");
     approxNewton->Draw("same");
     legend->Draw();
+
+    canvas1->cd(2);
+    gPad->SetGrid();
+    diff->Draw("AL");
     return 0;
 }
