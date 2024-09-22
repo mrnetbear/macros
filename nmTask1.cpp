@@ -24,7 +24,6 @@
 #define LEFT_NOD 0
 #define RIGHT_NOD 3
 #define NUM_OF_POINTS 100
-//#define M_PI 3.1415926535
 
 
 int factorial(int n){
@@ -56,9 +55,7 @@ void basedPoly(TMatrixD &x, TMatrixD &f, double *x1, double *fx2){
         fx2[i] = 0.0;
         for (int j = 0; j < NUM_OF_NODS; j++){
             fx2[i] += aj(j,0)*pow(x1[i], j);
-            //std::cout << "aj[" << j << "] = " <<aj(j,0) << ";" << std::endl;
         }
-        //std::cout << "f[" << i << "] = " << fx2[i] << ";" << std::endl;
     }
 }
 
@@ -97,7 +94,6 @@ void newtonPoly(TMatrixD &x, TMatrixD &f,  double *x1, double *fx4, int num){
     for (int i = 0; i < num; i++){
         for (int j =1; j <= i; j++){
             dividedDifferences[i][j] = (dividedDifferences[i][j-1] - dividedDifferences[i-1][j-1])/(x(i,0)-x(i-j,0));
-            //std::cout << " F[" << i << "," << j << "] = " << dividedDifferences[i][j];
         }
     }
 
@@ -111,7 +107,6 @@ void newtonPoly(TMatrixD &x, TMatrixD &f,  double *x1, double *fx4, int num){
             }
             fx4[i] += numerator * dividedDifferences[j][j];  
         }
-        //std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x1[i] << std::endl;
     }
 }
 
@@ -129,7 +124,6 @@ void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
             }
             R[i] += numerator * coefR;  
         }
-        //std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x1[i] << std::endl;
     }
 
 }
@@ -182,8 +176,6 @@ int interPoly(){
     for (int i=0; i<NUM_OF_NODS_ACC; i++){
         xmore(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS_ACC * i;
         fmore(i,0) = sin(xmore(i,0))*exp(-xmore(i,0));
-        //std::cout << "xmore[" << i << "] = " << x(i,0) << std::endl;
-        //std::cout << "fmore[" << i << "] = " << fmore(i,0) << std::endl;
     }
 
     double fx5 [NUM_OF_POINTS];
