@@ -182,8 +182,8 @@ int interPoly(){
     for (int i=0; i<NUM_OF_NODS_ACC; i++){
         xmore(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS_ACC * i;
         fmore(i,0) = sin(xmore(i,0))*exp(-xmore(i,0));
-        std::cout << "xmore[" << i << "] = " << x(i,0) << std::endl;
-        std::cout << "fmore[" << i << "] = " << fmore(i,0) << std::endl;
+        //std::cout << "xmore[" << i << "] = " << x(i,0) << std::endl;
+        //std::cout << "fmore[" << i << "] = " << fmore(i,0) << std::endl;
     }
 
     double fx5 [NUM_OF_POINTS];
