@@ -25,7 +25,7 @@
 #define NUM_OF_POINTS 100
 
 
-void basedPoly(TMatrixD &x, TMatrixD &f, double &x1[NUM_OF_NODS], double &fx2[NUM_OF_NODS]){
+void basedPoly(TMatrixD &x, TMatrixD &f, double *x1, double *fx2/*const double (&x1)[NUM_OF_POINTS], double (&fx2)[NUM_OF_POINTS]*/){
     //Define the coefficients
     TMatrixD A(NUM_OF_NODS,NUM_OF_NODS);
     TMatrixD aj(NUM_OF_NODS,1);
@@ -49,65 +49,8 @@ void basedPoly(TMatrixD &x, TMatrixD &f, double &x1[NUM_OF_NODS], double &fx2[NU
     }
 }
 
-int interPoly(){
-
-    //Define the coefficients of the polynomial
-    TMatrixD A(NUM_OF_NODS,NUM_OF_NODS);
-    TMatrixD f(NUM_OF_NODS,1);
-    TMatrixD aj(NUM_OF_NODS,1);
-    TMatrixD x(NUM_OF_NODS,1);
-
-    //Set the coefficients
-
-    const double left = LEFT_NOD, right = RIGHT_NOD;
-
-    for (int i=0; i<NUM_OF_NODS; i++){
-        //A(i,0) = 1;
-        x(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS * i;
-
-        f(i,0) = sin(x(i,0))*exp(-x(i,0));
-        /*for (int j=1; j<NUM_OF_NODS; j++){
-            A(i,j) = pow(x(i,0), j);
-        }*/
-    }
-    //Print all coefficients
-    /*std::cout << "================================================================" << std::endl;
-    for (int i=0; i<NUM_OF_NODS; i++){
-        for (int j = 0; j < NUM_OF_NODS; j++)
-        {
-            std::cout << A(i,j) << " ";
-        }
-        std::cout << "| " << x(i,0) << " | " << f(i,0) << std::endl;
-        
-    }
-    std::cout << "================================================================" << std::endl;
-    //Perform the transformation
-    double det = A.Determinant();
-    if (!det) return 1;
-
-    aj = A.Invert(&det)*f;
-
-    //Print inverted matrix
-    std::cout << "================Inverted matrix================" << std::endl;
-    for (int i = 0; i < NUM_OF_NODS; i++){
-        for (int j = 0; j < NUM_OF_NODS; j++)
-        {
-            std::cout << A(i,j) << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "===============================================" << std::endl;
-
-    //Print found coefficients
-    std::cout << "================Original coefficients================" << std::endl;
-    for (int i = 0; i < NUM_OF_NODS; i++){
-        std::cout << "aj(" << i << ") = " << aj(i,0) << std::endl;
-    }
-    std::cout << "=====================================================" << std::endl;*/
-
-    
-
-    //Generate Lagrange coefficients
+void lagrangePoly(TMatrixD &x, TMatrixD &f,  double *x1, double *fx3/*const double (&x1)[NUM_OF_POINTS], double (&fx3)[NUM_OF_POINTS]*/){
+    //Calculate Lagrange coefficients
     double lagrangeCoef[NUM_OF_NODS];
     for (int i = 0; i < NUM_OF_NODS; i++) {
         lagrangeCoef[i] = 1.0;
@@ -116,6 +59,32 @@ int interPoly(){
                 lagrangeCoef[i] *= (x(i,0) - x(j,0));
             }
         }
+    }
+    //Calculate Lagrange polynom
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        fx3[i] = 0.0;
+        for (int j = 0; j < NUM_OF_NODS; j++){
+            double numerator = 1.0;
+            for (int k = 0; k < NUM_OF_NODS; k++){
+                if (k != j) {
+                    numerator *= (x1[i] - x(k,0));
+                }
+            }
+            fx3[i] += (numerator / lagrangeCoef[j]) * f(j,0);
+        }
+    }
+}
+
+int interPoly(){
+
+    //Define the nods of the polynom
+    TMatrixD f(NUM_OF_NODS,1);
+    TMatrixD x(NUM_OF_NODS,1);
+
+
+    for (int i=0; i<NUM_OF_NODS; i++){
+        x(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS * i;
+        f(i,0) = sin(x(i,0))*exp(-x(i,0));
     }
 
     //Calculate divided differences
@@ -146,31 +115,12 @@ int interPoly(){
 
     //Generate approximated based Polynomial function 
     double fx2 [NUM_OF_POINTS];
-
     basedPoly(x, f, x1, fx2);
-    /*for (int i = 0; i < NUM_OF_POINTS; i++){
-        for (int j = 0; j < NUM_OF_NODS; j++){
-            fx2[i] += aj(j,0)*pow(x1[i], j);
-        }
-    }*/
 
-    //Calculate Lagrange polynomial
-    double x3 [NUM_OF_POINTS];
+    //Generate Lagrange polynomial function
     double fx3 [NUM_OF_POINTS];
-    for (int i = 0; i < NUM_OF_POINTS; i++){
-        x3[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
-        fx3[i] = 0.0;
-        for (int j = 0; j < NUM_OF_NODS; j++){
-            double numerator = 1.0;
-            for (int k = 0; k < NUM_OF_NODS; k++){
-                if (k != j) {
-                    numerator *= (x3[i] - x(k,0));
-                }
-            }
-            fx3[i] += (numerator / lagrangeCoef[j]) * f(j,0);
-        }
-    }
-
+    lagrangePoly(x, f, x1, fx3);
+    
     //Calculate Newton polynomial
 
     double x4 [NUM_OF_POINTS];
@@ -182,17 +132,14 @@ int interPoly(){
             for (int k = 0; k < j; k++){
                 numerator *= (x4[i] - x(k,0));
             }
-            fx4[i] += numerator * dividedDifferences[j][j]; // pow(x4[i] - x(j,0), j+1);   
+            fx4[i] += numerator * dividedDifferences[j][j];  
         }
         std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x4[i] << std::endl;
     }
 
     //Calculate difference between original and newton values
-
-    double xdiff[NUM_OF_POINTS];
     double fdiff[NUM_OF_POINTS];
     for (int i = 0; i < NUM_OF_POINTS; i++){
-        xdiff[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
         fdiff[i] = abs(fx4[i] - fx1[i]);
     }
 
@@ -225,7 +172,7 @@ int interPoly(){
     approxNewton->SetLineWidth(3);
 
     //Draw difference between original and newton values
-    TGraph* diff = new TGraph (NUM_OF_POINTS, xdiff, fdiff);
+    TGraph* diff = new TGraph (NUM_OF_POINTS, x1, fdiff);
     diff->SetMarkerStyle(60);
     diff->SetMarkerColor(kBlack);
     diff->SetLineColor(kBlack);
