@@ -20,6 +20,9 @@
 #include "TDecompLU.h"
 
 #define NUM_OF_NODS 7
+#define LEFT_NOD 0
+#define RIGHT_NOD 3
+#define NUM_OF_POINTS 100
 
 int interPoly(){
 
@@ -31,11 +34,11 @@ int interPoly(){
 
     //Set the coefficients
 
-    const double left = 0, right = 3;
+    const double left = LEFT_NOD, right = RIGHT_NOD;
 
     for (int i=0; i<NUM_OF_NODS; i++){
         A(i,0) = 1;
-        x(i,0) = right/(double)NUM_OF_NODS * i;
+        x(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS * i;
 
         f(i,0) = sin(x(i,0))*exp(-x(i,0));
         for (int j=1; j<NUM_OF_NODS; j++){
@@ -105,30 +108,30 @@ int interPoly(){
 
 
     //Generate original function
-    double x1 [100];
-    double fx1 [100];
-    for (int i = 0; i < 100; i++){
-        x1[i] = 3.0/100.00 * i;
+    double x1 [NUM_OF_POINTS];
+    double fx1 [NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        x1[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
         fx1[i] = sin(x1[i])*exp(-x1[i]);
     }
 
     
 
     //Generate approximated based Polynomial function 
-    double x2 [100];
-    double fx2 [100];
-    for (int i = 0; i < 100; i++){
-        x2[i] = 3.0/100.00 * i;
+    double x2 [NUM_OF_POINTS];
+    double fx2 [NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        x2[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
         for (int j = 0; j < NUM_OF_NODS; j++){
             fx2[i] += aj(j,0)*pow(x2[i], j);
         }
     }
 
     //Calculate Lagrange polynomial
-    double x3 [100];
-    double fx3 [100];
-    for (int i = 0; i < 100; i++){
-        x3[i] = 3.0/100.00 * i;
+    double x3 [NUM_OF_POINTS];
+    double fx3 [NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        x3[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
         fx3[i] = 0.0;
         for (int j = 0; j < NUM_OF_NODS; j++){
             double numerator = 1.0;
@@ -143,10 +146,10 @@ int interPoly(){
 
     //Calculate Newton polynomial
 
-    double x4 [100];
-    double fx4 [100];
-    for (int i = 0; i < 100; i++){
-        x4[i] = 3.0/100.00 * i;
+    double x4 [NUM_OF_POINTS];
+    double fx4 [NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        x4[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
         for (int j = 0; j < NUM_OF_NODS; j++){
             double numerator = 1.0;
             for (int k = 0; k < j; k++){
@@ -157,36 +160,54 @@ int interPoly(){
         std::cout << "f4[" << i << "] = " << fx4[i] << "; x4[" << i << "] = " << x4[i] << std::endl;
     }
 
+    //Calculate difference between original and newton values
+
+    double xdiff[NUM_OF_POINTS];
+    double fdiff[NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        xdiff[i] = (double)RIGHT_NOD/(double)NUM_OF_POINTS * i;
+        fdiff[i] = abs(fx4[i] - fx1[i]);
+    }
+
     //Draw original function
-    TGraph* origin = new TGraph (100, x1, fx1);
+    TGraph* origin = new TGraph (NUM_OF_POINTS, x1, fx1);
     origin->SetMarkerStyle(20);
     origin->SetMarkerColor(kRed);
     origin->SetLineColor(kRed);
     origin->SetLineWidth(14);
 
     //Draw based approximation
-    TGraph* approxPol = new TGraph (100, x2, fx2);
+    TGraph* approxPol = new TGraph (NUM_OF_POINTS, x2, fx2);
     approxPol->SetMarkerStyle(30);
     approxPol->SetMarkerColor(kBlue);
     approxPol->SetLineColor(kBlue);
     approxPol->SetLineWidth(10);
 
     //Draw Lagrange polynomial
-    TGraph* approxLag = new TGraph (100, x3, fx3);
+    TGraph* approxLag = new TGraph (NUM_OF_POINTS, x3, fx3);
     approxLag->SetMarkerStyle(40);
     approxLag->SetMarkerColor(kGreen);
     approxLag->SetLineColor(kGreen);
     approxLag->SetLineWidth(6);
 
     //Draw Newton Polynomial
-    TGraph* approxNewton = new TGraph (100, x4, fx4);
+    TGraph* approxNewton = new TGraph (NUM_OF_POINTS, x4, fx4);
     approxNewton->SetMarkerStyle(50);
     approxNewton->SetMarkerColor(kOrange);
     approxNewton->SetLineColor(kOrange);
     approxNewton->SetLineWidth(3);
 
-    TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations");
-    canvas1->SetGrid();
+    //Draw difference between original and newton values
+    TGraph* diff = new TGraph (NUM_OF_POINTS, xdiff, fdiff);
+    diff->SetMarkerStyle(60);
+    diff->SetMarkerColor(kBlack);
+    diff->SetLineColor(kBlack);
+    diff->SetLineWidth(2);
+
+    TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations", 600, 900);
+    canvas1->Divide(1, 2);
+    canvas1->cd(1);
+    gPad->SetGrid();
 
     TLegend *legend = new TLegend(0.2, 0.2, 0.5, 0.5);
     legend->SetHeader("Interpolation Functions","C");
@@ -200,5 +221,9 @@ int interPoly(){
     approxLag->Draw("same");
     approxNewton->Draw("same");
     legend->Draw();
+
+    canvas1->cd(2);
+    gPad->SetGrid();
+    diff->Draw("AL");
     return 0;
 }
