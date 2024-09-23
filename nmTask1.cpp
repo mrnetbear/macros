@@ -119,10 +119,10 @@ void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
         R[i] = 0.0;
         for (int j = 0; j < num; j++){
             double numerator = 1.0;
-            for (int k = 0; k < j; k++){
+            for (int k = 0; k < num; k++){
                 numerator *= (x1[i] - x(k,0));
             }
-            R[i] += numerator * coefR;  
+            R[i] += std::abs(numerator) * coefR;  
         }
     }
 
@@ -187,8 +187,10 @@ int interPoly(){
     }
 
     //Calculate R
-    double R[NUM_OF_POINTS];
-    errorEvaluation(xmore, fmore, x1, R, NUM_OF_NODS_ACC);
+    double R7[NUM_OF_POINTS];
+    double R8[NUM_OF_POINTS];
+    errorEvaluation(x, f, x1, R7, NUM_OF_NODS);
+    errorEvaluation(xmore, fmore, x1, R8, NUM_OF_NODS_ACC);
 
     //Draw original function
     TGraph* origin = new TGraph (NUM_OF_POINTS, x1, fx1);
@@ -239,8 +241,15 @@ int interPoly(){
     diffmore->SetLineColor(kGreen);
     diffmore->SetLineWidth(2);
 
-    //Draw R
-    TGraph* error = new TGraph (NUM_OF_POINTS, x1, R);
+    //Draw R7
+    TGraph* error7 = new TGraph (NUM_OF_POINTS, x1, R7);
+    error7->SetMarkerStyle(60);
+    error7->SetMarkerColor(kRed);
+    error7->SetLineColor(kRed);
+    error7->SetLineWidth(2);
+
+    //Draw R8
+    TGraph* error = new TGraph (NUM_OF_POINTS, x1, R8);
     error->SetMarkerStyle(60);
     error->SetMarkerColor(kBlue);
     error->SetLineColor(kBlue);
@@ -283,12 +292,14 @@ int interPoly(){
     legend2->SetHeader("Method error","C");
     legend2->AddEntry(diff, "Difference n = 7", "lp");
     legend2->AddEntry(diffmore, "Difference n = 8", "lp");
-    //legend2->AddEntry(error, "Error R" , "lp");
+    legend2->AddEntry(error7, "Evaluated error n = 7" , "lp");
+    legend2->AddEntry(error, "Evaluated error n = 8" , "lp");
     gPad->SetGrid();
 
-    diff->Draw("AL");
+    error7->Draw("AL");
+    diff->Draw("same");
     diffmore->Draw("same");
-    //error->Draw("same");
+    error->Draw("same");
     legend2->Draw();
     return 0;
 }
