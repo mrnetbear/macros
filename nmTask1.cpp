@@ -112,7 +112,7 @@ void newtonPoly(TMatrixD &x, TMatrixD &f,  double *x1, double *fx4, int num){
 
 void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
     //Calculate coefficient
-    double coefR = 16.0 * sin(M_PI/4.0)*exp(-M_PI/4.0) / factorial(num);
+    double coefR = 16.0 * sin(M_PI/4.0)*exp(-M_PI/4.0) / factorial(num+1);
     
     //Calculate R
     for (int i = 0; i < NUM_OF_POINTS; i++){
@@ -266,6 +266,7 @@ int interPoly(){
     legend->AddEntry(approxNewton, "Newton Polynomial", "lp");
 
     origin->Draw();
+    origin->SetTitle("Interpolation Functions");
     approxPol->Draw("same");
     approxLag->Draw("same");
     approxNewton->Draw("same");
@@ -282,6 +283,7 @@ int interPoly(){
     legend3->AddEntry(approxNewtonMore, "Newton Polynomial n = 8", "lp");
 
     origin->Draw();
+    origin->SetTitle("L_{7} and L_{8}");
     approxNewton->Draw("same");
     approxNewtonMore->Draw("same");
     legend3->Draw();
@@ -296,7 +298,8 @@ int interPoly(){
     legend2->AddEntry(error, "Evaluated error n = 8" , "lp");
     gPad->SetGrid();
 
-    error7->GetYaxis()->SetRangeUser(0.0, 0.002);
+    error7->GetYaxis()->SetRangeUser(0.0, 0.0003);
+    error7->SetTitle("Errors");
     error7->Draw("AL");
     diff->Draw("same");
     diffmore->Draw("same");
