@@ -296,6 +296,7 @@ int interPoly(){
     legend2->AddEntry(error, "Evaluated error n = 8" , "lp");
     gPad->SetGrid();
 
+    error7->GetYaxis()->SetRangeUser(0.0, 0.002);
     error7->Draw("AL");
     diff->Draw("same");
     diffmore->Draw("same");
