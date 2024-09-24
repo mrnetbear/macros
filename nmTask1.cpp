@@ -95,6 +95,7 @@ void newtonPoly(TMatrixD &x, TMatrixD &f,  double *x1, double *fx4, int num){
         for (int j =1; j <= i; j++){
             dividedDifferences[i][j] = (dividedDifferences[i][j-1] - dividedDifferences[i-1][j-1])/(x(i,0)-x(i-j,0));
         }
+        std::cout << dividedDifferences[i][i]  << std::endl;
     }
 
     //Calculate Newton polynomial
@@ -237,22 +238,24 @@ int interPoly(){
     //Draw difference between original and more newton values
     TGraph* diffmore = new TGraph (NUM_OF_POINTS, x1, fdiffmore);
     diffmore->SetMarkerStyle(60);
-    diffmore->SetMarkerColor(kGreen);
-    diffmore->SetLineColor(kGreen);
+    diffmore->SetMarkerColor(kGray);
+    diffmore->SetLineColor(kGray);
     diffmore->SetLineWidth(2);
 
     //Draw R7
     TGraph* error7 = new TGraph (NUM_OF_POINTS, x1, R7);
     error7->SetMarkerStyle(60);
-    error7->SetMarkerColor(kRed);
-    error7->SetLineColor(kRed);
+    error7->SetMarkerColor(kBlack);
+    error7->SetLineColor(kBlack);
+    error7->SetLineStyle(9);
     error7->SetLineWidth(2);
 
     //Draw R8
     TGraph* error = new TGraph (NUM_OF_POINTS, x1, R8);
     error->SetMarkerStyle(60);
-    error->SetMarkerColor(kBlue);
-    error->SetLineColor(kBlue);
+    error->SetMarkerColor(kGray);
+    error->SetLineColor(kGray);
+    error->SetLineStyle(9);
     error->SetLineWidth(2);
 
     TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations", 900, 600);
