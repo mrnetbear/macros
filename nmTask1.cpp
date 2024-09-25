@@ -196,43 +196,54 @@ int interPoly(){
     //Draw original function
     TGraph* origin = new TGraph (NUM_OF_POINTS, x1, fx1);
     origin->SetMarkerStyle(20);
+    origin->SetMarkerSize(0.1);
     origin->SetMarkerColor(kRed);
     origin->SetLineColor(kRed);
-    origin->SetLineWidth(14);
+    origin->SetLineStyle(10);
+    origin->SetLineWidth(2);
 
     //Draw based approximation
     TGraph* approxPol = new TGraph (NUM_OF_POINTS, x1, fx2);
     approxPol->SetMarkerStyle(30);
+    approxPol->SetMarkerSize(0.1);
     approxPol->SetMarkerColor(kBlue);
     approxPol->SetLineColor(kBlue);
-    approxPol->SetLineWidth(10);
+    approxPol->SetLineStyle(8);
+    approxPol->SetLineWidth(2);
 
     //Draw Lagrange polynomial
     TGraph* approxLag = new TGraph (NUM_OF_POINTS, x1, fx3);
     approxLag->SetMarkerStyle(40);
+    approxLag->SetMarkerSize(0.1);
     approxLag->SetMarkerColor(kGreen);
     approxLag->SetLineColor(kGreen);
-    approxLag->SetLineWidth(6);
+    approxLag->SetLineStyle(7);
+    approxLag->SetLineWidth(2);
 
     //Draw Newton Polynomial
     TGraph* approxNewton = new TGraph (NUM_OF_POINTS, x1, fx4);
     approxNewton->SetMarkerStyle(50);
+    approxNewton->SetMarkerSize(0.1);
     approxNewton->SetMarkerColor(kBlack);
     approxNewton->SetLineColor(kBlack);
-    approxNewton->SetLineWidth(3);
+    approxNewton->SetLineStyle(9);
+    approxNewton->SetLineWidth(2);
 
     //Draw Newton Polynomial
     TGraph* approxNewtonMore = new TGraph (NUM_OF_POINTS, x1, fx5);
     approxNewtonMore->SetMarkerStyle(50);
+    approxNewtonMore->SetMarkerSize(0.1);
     approxNewtonMore->SetMarkerColor(kGray);
     approxNewtonMore->SetLineColor(kGray);
-    approxNewtonMore->SetLineWidth(1);
+    approxNewtonMore->SetLineStyle(6);
+    approxNewtonMore->SetLineWidth(2);
 
     //Draw difference between original and newton values
     TGraph* diff = new TGraph (NUM_OF_POINTS, x1, fdiff);
     diff->SetMarkerStyle(60);
     diff->SetMarkerColor(kBlack);
     diff->SetLineColor(kBlack);
+    diff->SetLineStyle(9);
     diff->SetLineWidth(2);
 
     //Draw difference between original and more newton values
@@ -240,6 +251,7 @@ int interPoly(){
     diffmore->SetMarkerStyle(60);
     diffmore->SetMarkerColor(kGray);
     diffmore->SetLineColor(kGray);
+    diffmore->SetLineStyle(9);
     diffmore->SetLineWidth(2);
 
     //Draw R7
@@ -247,7 +259,6 @@ int interPoly(){
     error7->SetMarkerStyle(60);
     error7->SetMarkerColor(kBlack);
     error7->SetLineColor(kBlack);
-    error7->SetLineStyle(9);
     error7->SetLineWidth(2);
 
     //Draw R8
@@ -255,7 +266,6 @@ int interPoly(){
     error->SetMarkerStyle(60);
     error->SetMarkerColor(kGray);
     error->SetLineColor(kGray);
-    error->SetLineStyle(9);
     error->SetLineWidth(2);
 
     TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations", 900, 600);
