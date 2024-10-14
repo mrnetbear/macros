@@ -129,9 +129,76 @@ void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
 
 }
 
+void splineInterpolation(TMatrixD &x, TMatrixD &f, double *b, double *c, double *d, double *x1, double *S, int num){
+
+    //Calculate the function differences
+    double h[num-1];
+    for (int i = 0; i < num-1; i++){
+        h[i] = f(i+1,0) - f(i,0);
+    }
+
+    //Calculate the spline matrix
+    TMatrixD spline(num, num);
+    fillSplineMatrix(spline, h, num);
+
+    //Calculating devided differences
+    TMatrixD divDiff(num, 1);
+    divDiff(0,0) = 0;
+    divDiff(0,num-1) = 0;
+    for (int i = 1; i < num-1; i++){
+        divDiff(i,0) = 3.0 * ((f(i+1,0) - f(i,0)) / h[i] - (f(i,0) - f(i-1,0))/h[i-1]);
+    }
+    //Calculate the C coefficients
+    TMatrixD cVector = spline.Invert() * divDiff;
+    for (int i = 0; i < num; i++){
+        c[i] = cVector(i,0);
+    }
+    //Calculate the B & D coefficients
+    for (int i = 0; i < num-1; i++){
+        b[i] = (f(i+1,0) - f(i,0)) / h[i] - h[i] * (2.0 * c[i] + c[i+1]) / 3.0;
+        d[i] = (c[i+1] - c[i]) / (3.0 * h[i]);
+    }
+    
+
+}
+
+void fillSplineMatrix(TMatrixD &spline, double *h, int num){
+    //Fill the spline matrix
+    //Fill the first row
+    spline(0,0) = 1.0;
+    std::cout << spline(0,0);
+    for (int i = i; i < num; i++){
+        spline(0,i) = 0;
+        std::cout << "; " << spline(0,i);
+    }
+    std::cout << std::endl;
+    //Fill center
+    for (int i=1; i<num-1; i++){
+        for (int j=0; j<num; j++){
+            if (j==i-1) spline(i,j) = h[i];
+            else if (j==i) spline(i,j) = 2 * (h[i] + h[i+1]);
+            else if (j==i+1) spline(i,j) = h[i+1];
+            else spline(i,j) = 0.0;
+            std::cout << spline(i,j);
+            if (j<num-1) std::cout << "; ";
+        }
+        std::cout << std::endl;
+    }
+    //Fill the last row
+    for (int i=0; i<num-1; i++){
+        spline(num-1,i) = 0;
+        std::cout << spline(num-1,i);
+        if (i<num-1) std::cout << "; ";
+    }
+    spline(num-1,num-1) = 1.0;
+    std::cout << spline(num-1,num-1) << std::endl;
+}
+
 int interPoly(){
 
-    //Define the nods of the polynom
+    //Define the nodes of the polynom
+
+    //Number of nodes is 7
     TMatrixD f(NUM_OF_NODS,1);
     TMatrixD x(NUM_OF_NODS,1);
 
@@ -139,6 +206,26 @@ int interPoly(){
     for (int i=0; i<NUM_OF_NODS; i++){
         x(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS * i;
         f(i,0) = sin(x(i,0))*exp(-x(i,0));
+    }
+
+    //Additional nodes for Newton polynomial
+    TMatrixD fmore(NUM_OF_NODS_ACC, 1);
+    TMatrixD xmore(NUM_OF_NODS_ACC, 1);
+
+
+    for (int i=0; i<NUM_OF_NODS_ACC; i++){
+        xmore(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS_ACC * i;
+        fmore(i,0) = sin(xmore(i,0))*exp(-xmore(i,0));
+    }
+
+    // Additional nodes for Chebyshev polynom
+
+    TMatrixD fchebyshev(NUM_OF_NODS_ACC, 1);
+    TMatrixD xchebyshev(NUM_OF_NODS_ACC, 1);
+
+    for (int i=0; i<NUM_OF_NODS_ACC; i++){
+        xchebyshev(i,0) = 1.5 * cos(M_PI*(2*i+1)/(2*NUM_OF_NODS_ACC)) + 1.5;
+        fchebyshev(i,0) = sin(xchebyshev(i,0))*exp(-xchebyshev(i,0));
     }
 
     //Generate original function
@@ -160,38 +247,86 @@ int interPoly(){
     lagrangePoly(x, f, x1, fx3);
     
     //Calculate Newton polynomial
+
+    //For 7 nodes
     double fx4 [NUM_OF_POINTS];
     newtonPoly(x, f, x1, fx4, NUM_OF_NODS);
-    
 
-    //Calculate difference between original and newton values
+    //For 8 nodes
+    double fx5 [NUM_OF_POINTS];
+    newtonPoly(xmore, fmore, x1, fx5, NUM_OF_NODS_ACC);
+
+    //For 8 nodes with Chebyshev distribution
+    double fx6 [NUM_OF_POINTS];
+    newtonPoly(xchebyshev, fchebyshev, x1, fx6, NUM_OF_NODS_ACC);
+
+    //Calculate difference between original and newton values with 7 nodes
     double fdiff[NUM_OF_POINTS];
     for (int i = 0; i < NUM_OF_POINTS; i++){
         fdiff[i] = abs(fx4[i] - fx1[i]);
     }
 
-    TMatrixD fmore(NUM_OF_NODS_ACC, 1);
-    TMatrixD xmore(NUM_OF_NODS_ACC, 1);
+    //Calculate difference between original and newton values with 8 nodes
 
-
-    for (int i=0; i<NUM_OF_NODS_ACC; i++){
-        xmore(i,0) = (double)RIGHT_NOD/(double)NUM_OF_NODS_ACC * i;
-        fmore(i,0) = sin(xmore(i,0))*exp(-xmore(i,0));
-    }
-
-    double fx5 [NUM_OF_POINTS];
-    newtonPoly(xmore, fmore, x1, fx5, NUM_OF_NODS_ACC);
-
+    //For 8 nodes with based distribution
     double fdiffmore[NUM_OF_POINTS];
     for (int i = 0; i < NUM_OF_POINTS; i++){
         fdiffmore[i] = abs(fx5[i] - fx1[i]);
     }
 
+    //For 8 nodes with Chebyshev distribution
+    double fdiffchebyshev[NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        fdiffchebyshev[i] = abs(fx6[i] - fx1[i]);
+    }
+
     //Calculate R
     double R7[NUM_OF_POINTS];
     double R8[NUM_OF_POINTS];
+    double R9[NUM_OF_POINTS];
     errorEvaluation(x, f, x1, R7, NUM_OF_NODS);
     errorEvaluation(xmore, fmore, x1, R8, NUM_OF_NODS_ACC);
+    errorEvaluation(xchebyshev, fchebyshev, x1, R9, NUM_OF_NODS_ACC);
+
+    //Draw nodes
+
+    //Draw 7 nodes
+    double fnodes7[NUM_OF_NODS], xnodes7[NUM_OF_NODS];
+    for (int i = 0; i < NUM_OF_NODS; i++)
+    {
+        xnodes7[i] = x(i, 0);
+        fnodes7[i] = f(i, 0);
+    }
+    
+    TGraph* nodes7 = new TGraph (NUM_OF_NODS, xnodes7, fnodes7);
+    nodes7->SetMarkerStyle(21);
+    nodes7->SetMarkerColor(7);
+
+    //Draw 8 nodes
+
+    //Based distribution
+    double fnodes8[NUM_OF_NODS_ACC], xnodes8[NUM_OF_NODS_ACC];
+    for (int i = 0; i < NUM_OF_NODS_ACC; i++)
+    {
+        xnodes8[i] = xmore(i, 0);
+        fnodes8[i] = fmore(i, 0);
+    }
+    
+    TGraph* nodes8 = new TGraph (NUM_OF_NODS_ACC, xnodes8, fnodes8);
+    nodes8->SetMarkerStyle(22);
+    nodes8->SetMarkerColor(8);
+
+    //Chebyshev distribution
+    double fnodes9[NUM_OF_NODS_ACC], xnodes9[NUM_OF_NODS_ACC];
+    for (int i = 0; i < NUM_OF_NODS_ACC; i++)
+    {
+        xnodes9[i] = xchebyshev(i, 0);
+        fnodes9[i] = fchebyshev(i, 0);
+    }
+    
+    TGraph* nodes9 = new TGraph (NUM_OF_NODS_ACC, xnodes9, fnodes9);
+    nodes9->SetMarkerStyle(23);
+    nodes9->SetMarkerColor(9);
 
     //Draw original function
     TGraph* origin = new TGraph (NUM_OF_POINTS, x1, fx1);
@@ -220,7 +355,7 @@ int interPoly(){
     approxLag->SetLineStyle(7);
     approxLag->SetLineWidth(2);
 
-    //Draw Newton Polynomial
+    //Draw Newton Polynomial with 7 nodes
     TGraph* approxNewton = new TGraph (NUM_OF_POINTS, x1, fx4);
     approxNewton->SetMarkerStyle(50);
     approxNewton->SetMarkerSize(0.1);
@@ -229,7 +364,7 @@ int interPoly(){
     approxNewton->SetLineStyle(9);
     approxNewton->SetLineWidth(2);
 
-    //Draw Newton Polynomial
+    //Draw Newton Polynomial with 8 nodes
     TGraph* approxNewtonMore = new TGraph (NUM_OF_POINTS, x1, fx5);
     approxNewtonMore->SetMarkerStyle(50);
     approxNewtonMore->SetMarkerSize(0.1);
@@ -237,6 +372,15 @@ int interPoly(){
     approxNewtonMore->SetLineColor(kGray);
     approxNewtonMore->SetLineStyle(6);
     approxNewtonMore->SetLineWidth(2);
+
+    //Draw Newton Polynomial with 8 nodes with Chebyshev distribution
+    TGraph* approxNewtonChebyshev = new TGraph (NUM_OF_POINTS, x1, fx6);
+    approxNewtonChebyshev->SetMarkerStyle(50);
+    approxNewtonChebyshev->SetMarkerSize(0.1);
+    approxNewtonChebyshev->SetMarkerColor(kMagenta);
+    approxNewtonChebyshev->SetLineColor(kMagenta);
+    approxNewtonChebyshev->SetLineStyle(5);
+    approxNewtonChebyshev->SetLineWidth(2);
 
     //Draw difference between original and newton values
     TGraph* diff = new TGraph (NUM_OF_POINTS, x1, fdiff);
@@ -254,6 +398,14 @@ int interPoly(){
     diffmore->SetLineStyle(9);
     diffmore->SetLineWidth(2);
 
+    //Draw difference between original and Chebyshev newton values
+    TGraph* diffchebyshev = new TGraph (NUM_OF_POINTS, x1, fdiffchebyshev);
+    diffchebyshev->SetMarkerStyle(60);
+    diffchebyshev->SetMarkerColor(kMagenta);
+    diffchebyshev->SetLineColor(kMagenta);
+    diffchebyshev->SetLineStyle(9);
+    diffchebyshev->SetLineWidth(2);
+
     //Draw R7
     TGraph* error7 = new TGraph (NUM_OF_POINTS, x1, R7);
     error7->SetMarkerStyle(60);
@@ -268,6 +420,13 @@ int interPoly(){
     error->SetLineColor(kGray);
     error->SetLineWidth(2);
 
+    //Draw R9
+    TGraph* errorChebyshev = new TGraph (NUM_OF_POINTS, x1, R9);
+    errorChebyshev->SetMarkerStyle(60);
+    errorChebyshev->SetMarkerColor(kMagenta);
+    errorChebyshev->SetLineColor(kMagenta);
+    errorChebyshev->SetLineWidth(2);
+
     TCanvas* canvas1 = new TCanvas("canvas1", "Graph and approximations", 900, 600);
     canvas1->SetGrid();
 
@@ -279,14 +438,19 @@ int interPoly(){
     legend->AddEntry(approxNewton, "Newton Polynomial", "lp");
 
     origin->Draw();
+    nodes7->Draw("Psame");
     origin->SetTitle("Interpolation Functions");
     approxPol->Draw("same");
     approxLag->Draw("same");
     approxNewton->Draw("same");
+
     legend->Draw();
     
+    //Draw two Newton polynomial interpolations with errors
     TCanvas* canvas2 = new TCanvas("canvas2", "Newton approximations & errors", 1200, 900);
     canvas2->Divide(1, 2);
+
+    //Newton interpolations
     canvas2->cd(1);
     gPad->SetGrid();
     TLegend *legend3 = new TLegend(0.2, 0.2, 0.5, 0.5);
@@ -296,12 +460,13 @@ int interPoly(){
     legend3->AddEntry(approxNewtonMore, "Newton Polynomial n = 8", "lp");
 
     origin->Draw();
-    origin->SetTitle("L_{7} and L_{8}");
+    nodes7->Draw("Psame");
+    nodes8->Draw("Psame");
     approxNewton->Draw("same");
     approxNewtonMore->Draw("same");
     legend3->Draw();
 
-
+    //Errors with evaluation
     canvas2->cd(2);
     TLegend *legend2 = new TLegend(0.2, 0.2, 0.5, 0.5);
     legend2->SetHeader("Method error","C");
@@ -318,5 +483,44 @@ int interPoly(){
     diffmore->Draw("same");
     error->Draw("same");
     legend2->Draw();
+
+    //Draw Chebyshev distribution
+    TCanvas *canvas3 = new TCanvas("canvas3", "Newton approximations & errors", 1200, 900);
+    canvas3->Divide(1, 2);
+    
+    //Newton interpolations
+    canvas3->cd(1);
+    gPad->SetGrid();
+    TLegend *legend4 = new TLegend(0.2, 0.2, 0.5, 0.5);
+    legend4->SetHeader("Newton Polynomial with Chebyshev distribution","C");
+    legend4->AddEntry(origin, "original", "lp");
+    legend4->AddEntry(approxNewtonMore, "Newton Polynomial n = 8", "lp");
+    legend4->AddEntry(approxNewtonChebyshev, "Newton Polynomial n = 8 with Chebyshev distribution", "lp");
+
+    origin->Draw();
+    nodes8->Draw("Psame");
+    nodes9->Draw("Psame");
+    approxNewtonMore->Draw("same");
+    approxNewtonChebyshev->Draw("same");
+    legend4->Draw();
+    
+    //Errors with evaluation
+    canvas3->cd(2);
+    gPad->SetGrid();
+    TLegend *legend5 = new TLegend(0.2, 0.2, 0.5, 0.5);
+    legend5->SetHeader("Method error with Chebyshev distribution","C");
+    legend5->AddEntry(diffmore, "Difference n = 8", "lp");
+    legend5->AddEntry(diffchebyshev, "Difference n = 8 with Chebyshev distribution", "lp");
+    legend5->AddEntry(error, "Evaluated error n = 8", "lp");
+    legend5->AddEntry(errorChebyshev, "Evaluated error n = 8 with Chebyshev distribution", "lp");
+
+    error->GetYaxis()->SetRangeUser(0.0, 0.00005);
+    error->SetTitle("Errors with Chebyshev distribution");
+    error->Draw("AL");
+    diffmore->Draw("same");
+    diffchebyshev->Draw("same");
+    errorChebyshev->Draw("same");
+    legend5->Draw();
+
     return 0;
 }
