@@ -129,30 +129,69 @@ void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
 
 }
 
-void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num){
+void splineInterpolation(TMatrixD &x, TMatrixD &f, double *b, double *c, double *d, double *x1, double *S, int num){
 
     //Calculate the function differences
     double h[num-1];
     for (int i = 0; i < num-1; i++){
         h[i] = f(i+1,0) - f(i,0);
     }
+
+    //Calculate the spline matrix
     TMatrixD spline(num, num);
+    fillSplineMatrix(spline, h, num);
+
+    //Calculating devided differences
+    TMatrixD divDiff(num, 1);
+    divDiff(0,0) = 0;
+    divDiff(0,num-1) = 0;
+    for (int i = 1; i < num-1; i++){
+        divDiff(i,0) = 3.0 * ((f(i+1,0) - f(i,0)) / h[i] - (f(i,0) - f(i-1,0))/h[i-1]);
+    }
+    //Calculate the C coefficients
+    TMatrixD cVector = spline.Invert() * divDiff;
+    for (int i = 0; i < num; i++){
+        c[i] = cVector(i,0);
+    }
+    //Calculate the B & D coefficients
+    for (int i = 0; i < num-1; i++){
+        b[i] = (f(i+1,0) - f(i,0)) / h[i] - h[i] * (2.0 * c[i] + c[i+1]) / 3.0;
+        d[i] = (c[i+1] - c[i]) / (3.0 * h[i]);
+    }
+    
+
 }
 
 void fillSplineMatrix(TMatrixD &spline, double *h, int num){
     //Fill the spline matrix
+    //Fill the first row
     spline(0,0) = 1.0;
-    for (int i = i; i < num; i++)
+    std::cout << spline(0,0);
+    for (int i = i; i < num; i++){
         spline(0,i) = 0;
+        std::cout << "; " << spline(0,i);
+    }
+    std::cout << std::endl;
+    //Fill center
     for (int i=1; i<num-1; i++){
         for (int j=0; j<num; j++){
             if (j==i-1) spline(i,j) = h[i];
             else if (j==i) spline(i,j) = 2 * (h[i] + h[i+1]);
             else if (j==i+1) spline(i,j) = h[i+1];
             else spline(i,j) = 0.0;
+            std::cout << spline(i,j);
+            if (j<num-1) std::cout << "; ";
         }
+        std::cout << std::endl;
+    }
+    //Fill the last row
+    for (int i=0; i<num-1; i++){
+        spline(num-1,i) = 0;
+        std::cout << spline(num-1,i);
+        if (i<num-1) std::cout << "; ";
     }
     spline(num-1,num-1) = 1.0;
+    std::cout << spline(num-1,num-1) << std::endl;
 }
 
 int interPoly(){
