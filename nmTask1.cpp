@@ -129,6 +129,32 @@ void errorEvaluation (TMatrixD &x, TMatrixD &f, double *x1, double *R, int num){
 
 }
 
+void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num){
+
+    //Calculate the function differences
+    double h[num-1];
+    for (int i = 0; i < num-1; i++){
+        h[i] = f(i+1,0) - f(i,0);
+    }
+    TMatrixD spline(num, num);
+}
+
+void fillSplineMatrix(TMatrixD &spline, double *h, int num){
+    //Fill the spline matrix
+    spline(0,0) = 1.0;
+    for (int i = i; i < num; i++)
+        spline(0,i) = 0;
+    for (int i=1; i<num-1; i++){
+        for (int j=0; j<num; j++){
+            if (j==i-1) spline(i,j) = h[i];
+            else if (j==i) spline(i,j) = 2 * (h[i] + h[i+1]);
+            else if (j==i+1) spline(i,j) = h[i+1];
+            else spline(i,j) = 0.0;
+        }
+    }
+    spline(num-1,num-1) = 1.0;
+}
+
 int interPoly(){
 
     //Define the nodes of the polynom
