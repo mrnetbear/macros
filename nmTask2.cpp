@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-//#include <math.h>
 #include <cmath>
 #include <time.h>
 #include <random>
