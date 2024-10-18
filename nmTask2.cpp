@@ -173,15 +173,15 @@ int interPoly(){
     diffspline->SetLineStyle(1);
     diffspline->SetLineWidth(2);
 
-    TCanvas *canvas4 = new TCanvas("canvas4", "Spline interpolation", 1200, 900);
-    canvas4->Divide(1, 2);
-    canvas4->cd(1);
+    TCanvas *canvas1 = new TCanvas("canvas4", "Spline interpolation", 1200, 900);
+    canvas1->Divide(1, 2);
+    canvas1->cd(1);
     gPad->SetGrid();
     origin->Draw();
     nodes7->Draw("Psame");
     spline->Draw("same");
 
-    canvas4->cd(2);
+    canvas1->cd(2);
     gPad->SetGrid();
     diffspline->Draw("AL");
 
