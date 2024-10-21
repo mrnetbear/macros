@@ -178,23 +178,15 @@ void spline3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S3, int 
 }
 
 void splineB1Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B1, int num){
-    TMatrixD splineB1(num-1,num-1);
-    TMatrixD fnew(num-1, 1);
+    TMatrixD splineB1(num,num);
 
-    //Calculate B1 coefficients
-    for (int i = 0; i < num-1; i++){
-        splineB1(i,i) = 1.0;
-        fnew(i,0) = f(i+1, 0);
-        for (int j = 0; j < num-1; j++){
-            if (i == j) continue;
-            splineB1(i,j) = 0;
-        }
-    }
+    std::cout << "Calculation of B1 coefficients completed" << std::endl;
+
+    
     int k = 0;
-    TMatrixD a = splineB1.Invert() * fnew;
     for (int i = 0; i < NUM_OF_POINTS; i++){
-        if (x1[i] > x(k,0)) k++;
-        B1[i] = a(k,0) * 2 * (x1[i] - x(k,0)) + a(k+1,0) * 2 * (-x1[i] + x(k+1,0));
+        if (x1[i] > x(k+1,0)) k++;
+        B1[i] = 2 * (f(k,0) * (x(k+1,0) - x1[i]) + f(k+1,0) * (x1[i] - x(k,0)));
     }
 }
 
