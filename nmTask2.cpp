@@ -26,6 +26,7 @@
 
 void fillSplineMatrix(TMatrixD &spline, double *h, int num);
 void fillSpline3Matrix(TMatrixD &spline3, double *h, int num);
+void fillSplineB3Matrix(TMatrixD &B3, double *h, int num);
 void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num);
 void spline3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S3, int num);
 void splineB1Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B1, int num);
@@ -96,6 +97,50 @@ void fillSpline3Matrix(TMatrixD &spline3, double *h, int num){
     spline3(num-1,num-1) = 1/h[num-2];
     std::cout << spline3(num-1,num-3) << "; " << spline3(num-1,num-2) << "; " << spline3(num-1,num-1);
     std::cout << std::endl;
+}
+
+void fillSplineB3Matrix(TMatrixD &splineB3, TMatrixD &x, double *h, int num){
+    //Fill the splineB3 matrix
+    TMatrixD spline3(num, num);
+    //Fill the first row
+    splineB3(0,0) = -2/(h[0]*h[0])+ 3/(h[0]*h[0]) * (x(0,0) + 0.5) / h[0];
+    splineB3(0,1) = -2/(h[0]*h[0]);
+    splineB3(0,2) = 1/(h[0]*h[0]) * (2 + (x(0,0) - x(1,0))/h[0]);
+    std::cout << splineB3(0,0) << "; " << splineB3(0,1) << "; " << splineB3(0,2);
+    for (int i = 3; i < num+2; i++){
+        splineB3(0,i) = 0;
+        std::cout << "; " << splineB3(0,i);
+    }
+    std::cout << std::endl;
+    //Fill center
+    for(int i = 1; i < num+1; i++){
+        for (int j = 0; j < num+2; j++){
+            if (j == i-1) {
+                if (i == 1) splineB3(i,j) = 1.0/6.0 * pow((2 - (x(0,0) + 0.5)/h[0]),3);
+                else splineB3(i,j) = 1.0/6.0 * pow((2 - (x(j,0) - x(j-1,0))/h[0]), 3);
+                //else splineB3(i,j) = 5.0/30.0;
+            }
+            else if (j == i) splineB3(i,j) = 2.0/3.0;
+            else if (j == i+1) {
+                if (i == num) splineB3(i,j) = 1.0/6.0 * pow((2 - (0.5)/h[0]), 3);
+                else splineB3(i,j) = 1.0/6.0 * pow((2 + (x(j-2,0) - x(j-1,0))/h[0]), 3);
+                //else splineB3(i,j) = -5.0/30.0;
+            }
+            else splineB3(i,j) = 0.0;
+            std::cout << splineB3(i,j) << "; ";
+        }
+        std::cout << std::endl;     
+    }
+    // Fill the last row
+    for (int i = 0; i < num-1; i++){
+        splineB3(num+1,i) = 0.0;
+        std::cout << splineB3(num+1,i) << "; ";
+    }
+    splineB3(num+1,num-1) = -2/(h[0]*h[0])+ 3/(h[0]*h[0]) * (x(num-1,0) - x(num-2,0)) / h[0];
+    splineB3(num+1,num) = -2/(h[0]*h[0]);
+    splineB3(num+1,num+1) = 1/(h[0]*h[0]) * (2 + (x(num-1,0) - 3.5)/h[0]);
+    std::cout << splineB3(num+1,num-1) << "; " << splineB3(num+1,num) << "; " << splineB3(num+1,num+1) << std::endl;
+
 }
 void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num){
 
@@ -190,6 +235,18 @@ void splineB1Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B1, int
     }
 }
 
+void splineB3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B3, int num){
+    //Calculate the function differences
+    double h[num-1];
+    for (int i = 0; i < num-1; i++){
+        h[i] = x(i+1,0) - x(i,0);
+    }
+
+    TMatrixD splineB3(num+2, num+2);
+    fillSplineB3Matrix(splineB3, x, h, num);
+
+}
+
 int interPoly(){
 
     //Define the nodes of the polynom
@@ -226,6 +283,12 @@ int interPoly(){
     // Calculate B1 spline interpolation
     double B1[NUM_OF_POINTS];
     splineB1Interpolation(x, f, x1, B1, NUM_OF_NODS);
+
+    // Calculate B3 spline interpolation
+    double B3[NUM_OF_POINTS];
+    splineB3Interpolation(x, f, x1, B3, NUM_OF_NODS);
+
+    
 
     //Calculate difference between original and spline B1 values
     double fdiffB1[NUM_OF_POINTS];
