@@ -101,11 +101,12 @@ void fillSpline3Matrix(TMatrixD &spline3, double *h, int num){
 
 void fillSplineB3Matrix(TMatrixD &splineB3, TMatrixD &x, double *h, int num){
     //Fill the splineB3 matrix
-    TMatrixD spline3(num, num);
     //Fill the first row
     splineB3(0,0) = -2/(h[0]*h[0])+ 3/(h[0]*h[0]) * (x(0,0) + 0.5) / h[0];
+    //splineB3(0,0) = 12;
     splineB3(0,1) = -2/(h[0]*h[0]);
     splineB3(0,2) = 1/(h[0]*h[0]) * (2 + (x(0,0) - x(1,0))/h[0]);
+    //splineB3(0,2) = 12;
     std::cout << splineB3(0,0) << "; " << splineB3(0,1) << "; " << splineB3(0,2);
     for (int i = 3; i < num+2; i++){
         splineB3(0,i) = 0;
@@ -137,8 +138,11 @@ void fillSplineB3Matrix(TMatrixD &splineB3, TMatrixD &x, double *h, int num){
         std::cout << splineB3(num+1,i) << "; ";
     }
     splineB3(num+1,num-1) = -2/(h[0]*h[0])+ 3/(h[0]*h[0]) * (x(num-1,0) - x(num-2,0)) / h[0];
+    //splineB3(num+1,num-1) = 12;
     splineB3(num+1,num) = -2/(h[0]*h[0]);
     splineB3(num+1,num+1) = 1/(h[0]*h[0]) * (2 + (x(num-1,0) - 3.5)/h[0]);
+    //splineB3(num+1,num+1) = 12;
+    
     std::cout << splineB3(num+1,num-1) << "; " << splineB3(num+1,num) << "; " << splineB3(num+1,num+1) << std::endl;
 
 }
@@ -243,7 +247,25 @@ void splineB3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B3, int
     }
 
     TMatrixD splineB3(num+2, num+2);
+    TMatrixD f3(num+2, 1);
+    f3(0, 0) = 0.0;
+    f3(num+1, 0) = 0.0;
+    for (int i = 1; i < num+1; i++){
+        f3(i,0) = f(i-1, 0);
+    }
     fillSplineB3Matrix(splineB3, x, h, num);
+
+    TMatrixD aj = splineB3.Invert() * f3;
+
+    //Calculate the B3 coefficients
+    int k = 0;
+    int j = 0;
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        if (x1[i] > x(k+1,0)) {k++; j++;}
+        if (k == 0) B3[i] = aj(j,0) * 1.0/6.0 * pow((2 - (x1[i] + 0.5)/0.5),3) + aj(j+1,0) * (2.0/3.0 - pow(((x1[i] - x(k, 0))/0.5),2) + 0.5*pow(((x1[i] - x(k, 0))/0.5),3)) + aj(j+2,0) * (2.0/3.0 - pow(((x1[i] - x(k+1, 0))/0.5),2) - 0.5*pow(((x1[i] - x(k+1, 0))/0.5),3)) + aj(j+3,0) * 1/6.0 * pow((2 + (x1[i] - x(k+2,0))/0.5),3);
+        else if (k == num - 2) B3[i] = aj(j,0) * 1.0/6.0 * pow((2 - (x1[i] - x(k-1,0))/0.5),3) + aj(j+1,0) * (2.0/3.0 - pow(((x1[i] - x(k, 0))/0.5),2) + 0.5*pow(((x1[i] - x(k, 0))/0.5),3)) + aj(j+2,0) * (2.0/3.0 - pow(((x1[i] - x(k+1, 0))/0.5),2) - 0.5*pow(((x1[i] - x(k+1, 0))/0.5),3)) + aj(j+3,0) * 1/6.0 * pow((2 + (x1[i] - 3.5)/0.5),3);
+        else B3[i] = aj(j,0) * 1.0/6.0 * pow((2 - (x1[i] - x(k-1,0))/0.5),3) + aj(j+1,0) * (2.0/3.0 - pow(((x1[i] - x(k, 0))/0.5),2) + 0.5*pow(((x1[i] - x(k, 0))/0.5),3)) + aj(j+2,0) * (2.0/3.0 - pow(((x1[i] - x(k+1, 0))/0.5),2) - 0.5*pow(((x1[i] - x(k+1, 0))/0.5),3)) + aj(j+3,0) * 1/6.0 * pow((2 + (x1[i] - x(k+2, 0))/0.5),3);
+    }
 
 }
 
@@ -288,8 +310,11 @@ int interPoly(){
     double B3[NUM_OF_POINTS];
     splineB3Interpolation(x, f, x1, B3, NUM_OF_NODS);
 
-    
-
+    //Calculate difference between original and spline B3 values
+    double fdiffB3[NUM_OF_POINTS];
+    for (int i = 0; i < NUM_OF_POINTS; i++){
+        fdiffB3[i] = abs(B3[i] - fx1[i]);
+    }
     //Calculate difference between original and spline B1 values
     double fdiffB1[NUM_OF_POINTS];
     for (int i = 0; i < NUM_OF_POINTS; i++){
@@ -358,6 +383,15 @@ int interPoly(){
     splineB1->SetLineStyle(3);
     splineB1->SetLineWidth(2);
 
+    //Draw B3 spline interpolation
+    TGraph* splineB3 = new TGraph (NUM_OF_POINTS, x1, B3);
+    splineB3->SetMarkerStyle(24);
+    splineB3->SetMarkerSize(0.1);
+    splineB3->SetMarkerColor(kCyan);
+    splineB3->SetLineColor(kCyan);
+    splineB3->SetLineStyle(4);
+    splineB3->SetLineWidth(2);
+
     //Draw difference between original and spline values
     TGraph* diffspline = new TGraph (NUM_OF_POINTS, x1, fdiffspline);
     diffspline->SetMarkerStyle(60);
@@ -382,6 +416,16 @@ int interPoly(){
     diffB1->SetLineStyle(3);
     diffB1->SetLineWidth(2);
 
+    //Draw difference between original and spline B3 values
+    TGraph* diffB3 = new TGraph (NUM_OF_POINTS, x1, fdiffB3);
+    diffB3->SetMarkerStyle(60);
+    diffB3->SetMarkerColor(kCyan);
+    diffB3->SetLineColor(kCyan);
+    diffB3->SetLineStyle(4);
+    diffB3->SetLineWidth(2);
+
+    
+
     //Draw all
 
     TCanvas *canvas1 = new TCanvas("canvas4", "Spline interpolation", 1200, 900);
@@ -395,6 +439,7 @@ int interPoly(){
     leg1->AddEntry(spline, "Spline interpolation", "L");
     leg1->AddEntry(spline3, "Spline3 interpolation", "L");
     leg1->AddEntry(splineB1, "B1 spline interpolation", "L");
+    leg1->AddEntry(splineB3, "B3 spline interpolation", "L");
 
 
     origin->Draw();
@@ -402,6 +447,7 @@ int interPoly(){
     spline->Draw("same");
     spline3->Draw("same");
     splineB1->Draw("same");
+    splineB3->Draw("same");
 
     leg1->Draw("same");
 
@@ -413,10 +459,12 @@ int interPoly(){
     leg2->AddEntry(diffspline, "Spline Error", "L");
     leg2->AddEntry(diffspline3, "Spline3 Error", "L");
     leg2->AddEntry(diffB1, "B1 spline Error", "L");
+    leg2->AddEntry(diffB3, "B3 spline Error", "L");
 
     diffspline->Draw("AL");
     diffspline3->Draw("same");
     diffB1->Draw("same");
+    diffB3->Draw("same");
 
     leg2->Draw("same");
 
