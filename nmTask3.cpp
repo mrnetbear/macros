@@ -133,41 +133,41 @@ void numDiff(){
     leg->AddEntry(gR1a, "R_{1a}", "l");
     leg->AddEntry(gR1b, "R_{1b}", "l");
     leg->AddEntry(gR1c, "R_{1c}", "l");
-    //leg->AddEntry(gR2a, "R_{2a}", "l");
-    //leg->AddEntry(gR2b, "R_{2b}", "l");
+    leg->AddEntry(gR2a, "R_{2a}", "l");
+    leg->AddEntry(gR2b, "R_{2b}", "l");
     leg->SetHeader("Real Numerical Derivatives' errors","C");
     leg->AddEntry(gR1a1, "R_{1a1}", "l");
     leg->AddEntry(gR1b1, "R_{1b1}", "l");
     leg->AddEntry(gR1c1, "R_{1c1}", "l");
-    //leg->AddEntry(gR2a1, "R_{2a1}", "l");
-    //leg->AddEntry(gR2b1, "R_{2b1}", "l");
+    leg->AddEntry(gR2a1, "R_{2a1}", "l");
+    leg->AddEntry(gR2b1, "R_{2b1}", "l");
 
 
     TMultiGraph *mg = new TMultiGraph();
     mg->Add(gR1a);
     mg->Add(gR1b);
     mg->Add(gR1c);
-    //mg->Add(gR2a);
-    //mg->Add(gR2b);
+    mg->Add(gR2a);
+    mg->Add(gR2b);
 
     mg->Add(gR1a1);
     mg->Add(gR1b1);
     mg->Add(gR1c1);
-    //mg->Add(gR2a1);
-    //mg->Add(gR2b1);
+    mg->Add(gR2a1);
+    mg->Add(gR2b1);
 
     mg->SetTitle("Numerical Derivatives' Errors");
 
     mg->Draw("AC");
-    /*g->Draw("AC");
+    //g->Draw("AC");
     gR1a->Draw("same");
     gR1b->Draw("same");
     gR1c->Draw("same");
     gR2a->Draw("same");
-    gR2b->Draw("same");*/
+    gR2b->Draw("same");
     leg->Draw();
 
-    TCanvas *c2 = new TCanvas("c2", "Numerical Derivatives in segond grade Errors", 800, 600);
+    /*TCanvas *c2 = new TCanvas("c2", "Numerical Derivatives in segond grade Errors", 800, 600);
     c2->SetGrid();
     c2->SetLogy();
     c2->SetLogx();
@@ -189,5 +189,5 @@ void numDiff(){
 
     mg2->SetTitle("Numerical Derivatives' Errors in second grade");
     mg2->Draw("AC");
-    leg2->Draw();
+    leg2->Draw();*/
 }
