@@ -146,6 +146,7 @@ void fillSplineB3Matrix(TMatrixD &splineB3, TMatrixD &x, double *h, int num){
     std::cout << splineB3(num+1,num-1) << "; " << splineB3(num+1,num) << "; " << splineB3(num+1,num+1) << std::endl;
 
 }
+
 void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num){
 
     //Calculate the function differences
@@ -184,6 +185,7 @@ void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int nu
         S[i] = f(j,0) + b(j,0)*(x1[i] - x(j,0)) + cVector(j,0)*(x1[i] - x(j,0))*(x1[i] - x(j,0)) + d(j,0)*(x1[i] - x(j,0))*(x1[i] - x(j,0))*(x1[i] - x(j,0));
     }
 }
+
 void spline3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S3, int num){
     double h[num-1];
     for (int i = 0; i < num-1; i++){
