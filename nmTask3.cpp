@@ -11,6 +11,7 @@
 #include <math.h>
 #include "TFile.h"
 #include "TH1.h"
+#include "TF1.h"
 #include "TH2.h"
 #include "TTree.h"
 #include "TRandom.h"
@@ -26,44 +27,50 @@
 #define LEFT_POINT -3.0
 #define RIGHT_POINT 3.0
 
-void leftIntegrator(double *result){
-        double  x = LEFT_POINT,
-                h = 1e-6;
+void leftIntegrator(double *result, double h){
+        double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
                 *result += exp(-x) * h;
                 x += h;
                 //std::cout << "Left Integrator: " << result << std::endl;
         }
+        std::cout << std::this_thread::get_id() << " is done!" << std::endl;
 }
 
-void centralIntegrator(double *result){
-        double  x = LEFT_POINT,
-                h = 1e-6;
+void centralIntegrator(double *result, double h){
+        double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
                 *result += exp(-(x+0.5*h)) * h;
                 x += h;
                 //std::cout << "Central Integrator: " << result << std::endl;
         }
+        std::cout << std::this_thread::get_id() << " is done!" << std::endl;
 }
 
-void trapezoidIntegrator(double *result){
-        double  x = LEFT_POINT,
-                h = 1e-6;
+void trapezoidIntegrator(double *result, double h){
+        double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
                 *result += 0.5 * (exp(-(x)) + exp(-(x+h))) * h;
                 x += h;
                 //std::cout << "Trapezoid Integrator: " << result << std::endl;
         }
+        std::cout << std::this_thread::get_id() << " is done!" << std::endl;
 }
 
-void simpsonIntegrator(double *result){
-        double  x = LEFT_POINT,
-                h = 1e-6;
+void simpsonIntegrator(double *result, double h){
+        double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
                 *result += (exp(-(x)) + 4*exp(-(x+0.5*h)) + exp(-(x+h))) / 6.0 * h;
                 x += h;
                 //std::cout << "Simpson Integrator: " << result << std::endl;
         }
+        std::cout << std::this_thread::get_id() << " is done!" << std::endl;
+}
+
+void builtInIntegrator(double *result){
+        TF1 *f  = new TF1("f", "exp(-x)", LEFT_POINT, RIGHT_POINT);
+        *result = f->Integral(LEFT_POINT, RIGHT_POINT);
+        std::cout << std::this_thread::get_id() << " is done!" << std::endl;
 }
 
 void numDiff(){
@@ -216,24 +223,51 @@ void numDiff(){
 
 void numInt(){
         // Code for numerical integration goes here
-        double  leftInt = 0.0,
-                ctrInt = 0.0,
-                trpInt = 0.0,
-                simInt = 0.0;
-        std::thread th1(leftIntegrator, &leftInt);
-        std::thread th2(centralIntegrator, &ctrInt);
-        std::thread th3(trapezoidIntegrator, &trpInt);
-        std::thread th4(simpsonIntegrator, &simInt);
+        double  leftInt = 0.0, leftInt2 = 0.0, leftInt4 = 0.0,
+                ctrInt = 0.0, ctrInt2 = 0.0, ctrInt4 = 0.0,
+                trpInt = 0.0, trpInt2 = 0.0, trpInt4 = 0.0,
+                simInt = 0.0, simInt2 = 0.0, simInt4 = 0.0,
+                bInIntegral = 0.0;
+        
+        double h = 1e-6;
+
+        std::thread th1(leftIntegrator, &leftInt, h);
+        std::thread th2(centralIntegrator, &ctrInt, h);
+        std::thread th3(trapezoidIntegrator, &trpInt, h);
+        std::thread th4(simpsonIntegrator, &simInt, h);
+        std::thread th5(builtInIntegrator, &bInIntegral);
 
         th1.join();
         th2.join();
         th3.join();
         th4.join();
+        th5.join();
 
-        std::cout << "Left Riemann Sum: " << leftInt << std::endl;
-        std::cout << "Central Riemann Sum: " << ctrInt << std::endl;
-        std::cout << "Trapezoidal Rule: " << trpInt << std::endl;
-        std::cout << "Simpson's Rule: " << simInt << std::endl;
+        std::thread th6(leftIntegrator, &leftInt2, h/2.0);
+        std::thread th7(centralIntegrator, &ctrInt2, h/2.0);
+        std::thread th8(trapezoidIntegrator, &trpInt2, h/2.0);
+        std::thread th9(simpsonIntegrator, &simInt2, h/2.0);
+
+        th6.join();
+        th7.join();
+        th8.join();
+        th9.join();
+        
+        std::thread th10(leftIntegrator, &leftInt4, h/4.0);
+        std::thread th11(centralIntegrator, &ctrInt4, h/4.0);
+        std::thread th12(trapezoidIntegrator, &trpInt4, h/4.0);
+        std::thread th13(simpsonIntegrator, &simInt4, h/4.0);
+
+        th10.join();
+        th11.join();
+        th12.join();
+        th13.join();
+
+        std::cout << "Left Riemann Sum:\t" << leftInt << "\t" << leftInt2 << "\t" << leftInt4 << std::endl;
+        std::cout << "Central Riemann Sum:\t" << ctrInt << "\t" << ctrInt2 << "\t" << ctrInt4 << std::endl;
+        std::cout << "Trapezoidal Rule:\t" << trpInt << "\t" << trpInt2 << "\t" << trpInt4 << std::endl;
+        std::cout << "Simpson's Rule:\t\t" << simInt << "\t" << simInt2 << "\t" << simInt4 << std::endl;
+        std::cout << "Built-in Integral:\t" << bInIntegral << std::endl;
 
         
 
