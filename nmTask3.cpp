@@ -6,6 +6,9 @@
 #include <cmath>
 #include <time.h>
 #include <random>
+#include <thread>
+#include <chrono>
+#include <math.h>
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -20,6 +23,48 @@
 #include "TMultiGraph.h"
 
 #define NUM_OF_POINTS 1000
+#define LEFT_POINT -3.0
+#define RIGHT_POINT 3.0
+
+void leftIntegrator(double *result){
+        double  x = LEFT_POINT,
+                h = 1e-6;
+        while (x < RIGHT_POINT){
+                *result += exp(-x) * h;
+                x += h;
+                //std::cout << "Left Integrator: " << result << std::endl;
+        }
+}
+
+void centralIntegrator(double *result){
+        double  x = LEFT_POINT,
+                h = 1e-6;
+        while (x < RIGHT_POINT){
+                *result += exp(-(x+0.5*h)) * h;
+                x += h;
+                //std::cout << "Central Integrator: " << result << std::endl;
+        }
+}
+
+void trapezoidIntegrator(double *result){
+        double  x = LEFT_POINT,
+                h = 1e-6;
+        while (x < RIGHT_POINT){
+                *result += 0.5 * (exp(-(x)) + exp(-(x+h))) * h;
+                x += h;
+                //std::cout << "Trapezoid Integrator: " << result << std::endl;
+        }
+}
+
+void simpsonIntegrator(double *result){
+        double  x = LEFT_POINT,
+                h = 1e-6;
+        while (x < RIGHT_POINT){
+                *result += (exp(-(x)) + 4*exp(-(x+0.5*h)) + exp(-(x+h))) / 6.0 * h;
+                x += h;
+                //std::cout << "Simpson Integrator: " << result << std::endl;
+        }
+}
 
 void numDiff(){
     //define original functions
@@ -43,7 +88,7 @@ void numDiff(){
             h[NUM_OF_POINTS];
     // calculate numerical derivatives
     for (size_t i = 0; i < NUM_OF_POINTS; i++){
-        h[i] = 0.0001 * i + 1e-4;
+        h[i] = 0.0001 * i + 1e-5;
         double  fleft = exp(-(x-h[i])),
                 dfleft = -exp(-(x-h[i])),
                 d2fleft = exp(-(x-h[i])),
@@ -167,27 +212,29 @@ void numDiff(){
     gR2b->Draw("same");
     leg->Draw();
 
-    /*TCanvas *c2 = new TCanvas("c2", "Numerical Derivatives in segond grade Errors", 800, 600);
-    c2->SetGrid();
-    c2->SetLogy();
-    c2->SetLogx();
-    c2->cd();
+}
 
-    TLegend *leg2 = new TLegend(0.1, 0.7, 0.48, 0.9);
-    leg2->SetHeader("Numerical Derivatives' errors in second grade","C");
-    leg2->AddEntry(gR2a, "R_{2a}", "l");
-    leg2->AddEntry(gR2b, "R_{2b}", "l");
-    leg2->AddEntry(gR2a1, "R_{2a1}", "l");
-    leg2->AddEntry(gR2b1, "R_{2b1}", "l");
+void numInt(){
+        // Code for numerical integration goes here
+        double  leftInt = 0.0,
+                ctrInt = 0.0,
+                trpInt = 0.0,
+                simInt = 0.0;
+        std::thread th1(leftIntegrator, &leftInt);
+        std::thread th2(centralIntegrator, &ctrInt);
+        std::thread th3(trapezoidIntegrator, &trpInt);
+        std::thread th4(simpsonIntegrator, &simInt);
 
-    TMultiGraph *mg2 = new TMultiGraph();
-    mg2->Add(gR2a);
-    mg2->Add(gR2b);
+        th1.join();
+        th2.join();
+        th3.join();
+        th4.join();
 
-    mg2->Add(gR2a1);
-    mg2->Add(gR2b1);
+        std::cout << "Left Riemann Sum: " << leftInt << std::endl;
+        std::cout << "Central Riemann Sum: " << ctrInt << std::endl;
+        std::cout << "Trapezoidal Rule: " << trpInt << std::endl;
+        std::cout << "Simpson's Rule: " << simInt << std::endl;
 
-    mg2->SetTitle("Numerical Derivatives' Errors in second grade");
-    mg2->Draw("AC");
-    leg2->Draw();*/
+        
+
 }

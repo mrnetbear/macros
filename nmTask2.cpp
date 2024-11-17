@@ -22,7 +22,7 @@
 #define NUM_OF_NODS_ACC 8
 #define LEFT_NOD 0
 #define RIGHT_NOD 3
-#define NUM_OF_POINTS 100
+#define NUM_OF_POINTS 1000
 
 void fillSplineMatrix(TMatrixD &spline, double *h, int num);
 void fillSpline3Matrix(TMatrixD &spline3, double *h, int num);
@@ -30,6 +30,8 @@ void fillSplineB3Matrix(TMatrixD &B3, double *h, int num);
 void splineInterpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S, int num);
 void spline3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *S3, int num);
 void splineB1Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B1, int num);
+void splineB3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B3, int num);
+void splineB1Approximation(TMatrixD &x, TMatrixD &f, double *x1, double *appB1, int num);
 
 void fillSplineMatrix(TMatrixD &spline, double *h, int num){
     //Fill the spline matrix
@@ -269,6 +271,13 @@ void splineB3Interpolation(TMatrixD &x, TMatrixD &f, double *x1, double *B3, int
         else B3[i] = aj(j,0) * 1.0/6.0 * pow((2 - (x1[i] - x(k-1,0))/0.5),3) + aj(j+1,0) * (2.0/3.0 - pow(((x1[i] - x(k, 0))/0.5),2) + 0.5*pow(((x1[i] - x(k, 0))/0.5),3)) + aj(j+2,0) * (2.0/3.0 - pow(((x1[i] - x(k+1, 0))/0.5),2) - 0.5*pow(((x1[i] - x(k+1, 0))/0.5),3)) + aj(j+3,0) * 1/6.0 * pow((2 + (x1[i] - x(k+2, 0))/0.5),3);
     }
 
+}
+
+void splineB1Approximation(TMatrixD &x, TMatrixD &f, double *x1, double *appB1, int num){
+    double h = 0.5;
+    TMatrixD splineB1app(num,num);
+    TMatrixD aj(num, 1);
+    TMatrixD phif(num, 1);
 }
 
 int interPoly(){
