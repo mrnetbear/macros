@@ -321,17 +321,21 @@ void numInt(){
         c1->SetLogy();
         c1->SetLogx();
 
-        TGraph *gRleft = new TGraph(NUM_OF_POINTS*100, h1, leftErrorReal);
+        TGraph *gRleft = new TGraph(NUM_OF_POINTS, h1, leftErrorReal);
         gRleft->SetLineStyle(5);
+        gRleft->SetLineWidth(6);
         gRleft->SetLineColor(kRed);
-        TGraph *gRctr = new TGraph(NUM_OF_POINTS*100, h1, ctrErrorReal);
+        TGraph *gRctr = new TGraph(NUM_OF_POINTS, h1, ctrErrorReal);
         gRctr->SetLineStyle(7);
+        gRctr->SetLineWidth(6);
         gRctr->SetLineColor(kBlue);
-        TGraph *gRtrp = new TGraph(NUM_OF_POINTS*100, h1, trpErrorReal);
+        TGraph *gRtrp = new TGraph(NUM_OF_POINTS, h1, trpErrorReal);
         gRtrp->SetLineStyle(3);
+        gRtrp->SetLineWidth(6);
         gRtrp->SetLineColor(kGreen);
-        TGraph *gRsim = new TGraph(NUM_OF_POINTS*100, h1, simErrorReal);
+        TGraph *gRsim = new TGraph(NUM_OF_POINTS, h1, simErrorReal);
         gRsim->SetLineStyle(4);
+        gRsim->SetLineWidth(6);
         gRsim->SetLineColor(kOrange);
 
         TMultiGraph *mg = new TMultiGraph();
