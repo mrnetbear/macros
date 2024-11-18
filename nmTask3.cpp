@@ -227,7 +227,8 @@ void numInt(){
                 ctrInt = 0.0, ctrInt2 = 0.0, ctrInt4 = 0.0,
                 trpInt = 0.0, trpInt2 = 0.0, trpInt4 = 0.0,
                 simInt = 0.0, simInt2 = 0.0, simInt4 = 0.0,
-                bInIntegral = 0.0;
+                bInIntegral = 0.0,
+                realInt = 20.036;
         
         double h = 1e-6;
 
@@ -263,12 +264,92 @@ void numInt(){
         th12.join();
         th13.join();
 
+        double qLeft, qCtr, qTrp, qSim;
+
+        qLeft = log2((leftInt2 - leftInt)/(leftInt4 - leftInt2));
+        qCtr = log2((ctrInt2 - ctrInt)/(ctrInt4 - ctrInt2));
+        qTrp = log2((trpInt2 - trpInt)/(trpInt4 - trpInt2));
+        qSim = log2((simInt2 - simInt)/(simInt4 - simInt2));
+
+        double  leftErrorReal[NUM_OF_POINTS],
+                ctrErrorReal[NUM_OF_POINTS],
+                trpErrorReal[NUM_OF_POINTS],
+                simErrorReal[NUM_OF_POINTS];
+
         std::cout << "Left Riemann Sum:\t" << leftInt << "\t" << leftInt2 << "\t" << leftInt4 << std::endl;
         std::cout << "Central Riemann Sum:\t" << ctrInt << "\t" << ctrInt2 << "\t" << ctrInt4 << std::endl;
         std::cout << "Trapezoidal Rule:\t" << trpInt << "\t" << trpInt2 << "\t" << trpInt4 << std::endl;
         std::cout << "Simpson's Rule:\t\t" << simInt << "\t" << simInt2 << "\t" << simInt4 << std::endl;
         std::cout << "Built-in Integral:\t" << bInIntegral << std::endl;
 
+        std::cout << "Order of Accuracy:\nLeft: " << qLeft << ", Central: " << qCtr << ", Trapezoidal: " << qTrp << ", Simpson: " << qSim << std::endl;
+
+        double h1[NUM_OF_POINTS];
         
+        for(int i = 0; i < NUM_OF_POINTS; i++){
+                switch(i){
+                        case 0:
+                                h1[i] = h;
+                                leftErrorReal[i] = abs(leftInt - realInt);
+                                ctrErrorReal[i] = abs(ctrInt - realInt);
+                                trpErrorReal[i] = abs(trpInt - realInt);
+                                simErrorReal[i] = abs(simInt - realInt);
+                        default:
+                                h1[i] = h+double(1.0/(NUM_OF_POINTS*10)*i);
+                                double  leftIntP = 0.0,
+                                        ctrIntP = 0.0,
+                                        trpIntP = 0.0,
+                                        simIntP = 0.0;
+                                std::thread th1(leftIntegrator, &leftIntP, h1[i]);
+                                std::thread th2(centralIntegrator, &ctrIntP, h1[i]);
+                                std::thread th3(trapezoidIntegrator, &trpIntP, h1[i]);
+                                std::thread th4(simpsonIntegrator, &simIntP, h1[i]);
+                                th1.join();
+                                th2.join();
+                                th3.join();
+                                th4.join();
+                                leftErrorReal[i] = abs(leftIntP - realInt);
+                                ctrErrorReal[i] = abs(ctrIntP - realInt);
+                                trpErrorReal[i] = abs(trpIntP - realInt);
+                                simErrorReal[i] = abs(simIntP - realInt);
+                }
+        }
+
+        TCanvas *c1 = new TCanvas("c1","c1",800,600);
+
+        c1->SetGrid();
+        c1->SetLogy();
+        c1->SetLogx();
+
+        TGraph *gRleft = new TGraph(NUM_OF_POINTS*100, h1, leftErrorReal);
+        gRleft->SetLineStyle(5);
+        gRleft->SetLineColor(kRed);
+        TGraph *gRctr = new TGraph(NUM_OF_POINTS*100, h1, ctrErrorReal);
+        gRctr->SetLineStyle(7);
+        gRctr->SetLineColor(kBlue);
+        TGraph *gRtrp = new TGraph(NUM_OF_POINTS*100, h1, trpErrorReal);
+        gRtrp->SetLineStyle(3);
+        gRtrp->SetLineColor(kGreen);
+        TGraph *gRsim = new TGraph(NUM_OF_POINTS*100, h1, simErrorReal);
+        gRsim->SetLineStyle(4);
+        gRsim->SetLineColor(kOrange);
+
+        TMultiGraph *mg = new TMultiGraph();
+        mg->Add(gRleft);
+        mg->Add(gRctr);
+        mg->Add(gRtrp);
+        mg->Add(gRsim);
+        mg->SetTitle("Error vs. Step Size");
+
+        TLegend *leg = new TLegend(0.1,0.7,0.48,0.9);
+        leg->SetHeader("Numerical Integration Errors");
+        leg->AddEntry(gRleft,"L");
+        leg->AddEntry(gRctr,"L");
+        leg->AddEntry(gRtrp,"L");
+        leg->AddEntry(gRsim,"L");
+
+        mg->Draw("AL");
+        leg->Draw();
+
 
 }
