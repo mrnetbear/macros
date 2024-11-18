@@ -237,18 +237,16 @@ void numInt(){
         std::thread th3(trapezoidIntegrator, &trpInt, h);
         std::thread th4(simpsonIntegrator, &simInt, h);
         std::thread th5(builtInIntegrator, &bInIntegral);
+        std::thread th6(leftIntegrator, &leftInt2, h/2.0);
+        std::thread th7(centralIntegrator, &ctrInt2, h/2.0);
+        std::thread th8(trapezoidIntegrator, &trpInt2, h/2.0);
+        std::thread th9(simpsonIntegrator, &simInt2, h/2.0);
 
         th1.join();
         th2.join();
         th3.join();
         th4.join();
         th5.join();
-
-        std::thread th6(leftIntegrator, &leftInt2, h/2.0);
-        std::thread th7(centralIntegrator, &ctrInt2, h/2.0);
-        std::thread th8(trapezoidIntegrator, &trpInt2, h/2.0);
-        std::thread th9(simpsonIntegrator, &simInt2, h/2.0);
-
         th6.join();
         th7.join();
         th8.join();
