@@ -27,10 +27,14 @@
 #define LEFT_POINT -3.0
 #define RIGHT_POINT 3.0
 
+double f(double x){
+        return TMath::Exp(-x);
+}
+
 void leftIntegrator(double *result, double h){
         double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
-                *result += exp(-x) * h;
+                *result += f(x) * h;
                 x += h;
                 //std::cout << "Left Integrator: " << result << std::endl;
         }
@@ -40,7 +44,8 @@ void leftIntegrator(double *result, double h){
 void centralIntegrator(double *result, double h){
         double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
-                *result += exp(-(x+0.5*h)) * h;
+                if  (x+h*0.5 > RIGHT_POINT) break;
+                *result += f(x+0.5*h) * h;
                 x += h;
                 //std::cout << "Central Integrator: " << result << std::endl;
         }
@@ -50,7 +55,8 @@ void centralIntegrator(double *result, double h){
 void trapezoidIntegrator(double *result, double h){
         double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
-                *result += 0.5 * (exp(-(x)) + exp(-(x+h))) * h;
+                if  (x+h*0.5 > RIGHT_POINT) break;
+                *result += 0.5 * (f(x) + f(x+h)) * h;
                 x += h;
                 //std::cout << "Trapezoid Integrator: " << result << std::endl;
         }
@@ -60,7 +66,7 @@ void trapezoidIntegrator(double *result, double h){
 void simpsonIntegrator(double *result, double h){
         double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
-                *result += (exp(-(x)) + 4*exp(-(x+0.5*h)) + exp(-(x+h))) / 6.0 * h;
+                *result += h /6.0 * (f(x) + 4.0*f(x + 0.5 * h) + f(x + h));
                 x += h;
                 //std::cout << "Simpson Integrator: " << result << std::endl;
         }
@@ -228,11 +234,12 @@ void numInt(){
                 ctrInt = 0.0, ctrInt2 = 0.0, ctrInt4 = 0.0,
                 trpInt = 0.0, trpInt2 = 0.0, trpInt4 = 0.0,
                 simInt = 0.0, simInt2 = 0.0, simInt4 = 0.0,
-                bInIntegral = 0.0,
-                realInt = 20.0357;
+                bInIntegral = 0.0;
+
+        const double realInt = 20.0357;
         
         //define base step
-        double h = 1e-3;
+        double h = 6.0 / 999999;
 
         // calculation in different threads
         std::thread th1(leftIntegrator, &leftInt, h);
@@ -295,7 +302,7 @@ void numInt(){
                                 trpErrorReal[i] = abs(trpInt - realInt);
                                 simErrorReal[i] = abs(simInt - realInt);
                         default:
-                                h1[i] = h * (i + 1);
+                                h1[i] = h * (i + 1.0);
                                 h2[i] = h1[i] * h1[i];
                                 h4[i] = h2[i] * h2[i];
 
@@ -306,24 +313,28 @@ void numInt(){
                                         ctrIntP = 0.0,
                                         trpIntP = 0.0,
                                         simIntP = 0.0;
+
                                 std::thread th1(leftIntegrator, &leftIntP, h1[i]);
                                 std::thread th12(leftIntegrator, &leftIntP2, h1[i]/2.0);
                                 std::thread th14(leftIntegrator, &leftIntP4, h1[i]/4.0);
                                 std::thread th2(centralIntegrator, &ctrIntP, h1[i]);
                                 std::thread th3(trapezoidIntegrator, &trpIntP, h1[i]);
                                 std::thread th4(simpsonIntegrator, &simIntP, h1[i]);
+
                                 th1.join();
                                 th12.join();
                                 th14.join();
                                 th2.join();
                                 th3.join();
                                 th4.join();
+
                                 leftErrorReal[i] = abs(leftIntP - realInt);
                                 ctrErrorReal[i] = abs(ctrIntP - realInt);
                                 trpErrorReal[i] = abs(trpIntP - realInt);
                                 simErrorReal[i] = abs(simIntP - realInt);
-                                if (leftIntP2 - leftIntP4 > h){
-                                        double q = qLeft = log2((leftIntP2 - leftIntP)/(leftIntP4 - leftIntP2));
+                                
+                                if (leftIntP2 - leftIntP4 > 1e-6){
+                                        double q = log2((leftIntP2 - leftIntP)/(leftIntP4 - leftIntP2));
                                         leftIntPAbs = (pow(2, q) * leftIntP2 - leftIntP4) / (pow(2, q) - 1);
                                 }
                                 else 
@@ -348,6 +359,7 @@ void numInt(){
 
         std::cout << "================================================" << std::endl;
 
+        
 
         //Drawing plots
         TCanvas *c1 = new TCanvas("c1","c1",800,600);
@@ -423,4 +435,8 @@ void numInt(){
         leg->Draw();
 
 
+}
+
+void numIntMore(){
+        ;
 }
