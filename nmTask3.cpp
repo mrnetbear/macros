@@ -79,6 +79,10 @@ void builtInIntegrator(double *result){
         std::cout << std::this_thread::get_id() << " is done!" << std::endl;
 }
 
+double qGrid(double h){
+        return h/pow(1-h,3);
+}
+
 void numDiff(){
     //define original functions
     double  x = 1.0,
@@ -438,5 +442,7 @@ void numInt(){
 }
 
 void numIntMore(){
-        ;
+        //define step size
+        const double stepSize = 1e-5;
+
 }
