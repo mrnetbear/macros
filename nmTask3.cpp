@@ -45,7 +45,7 @@ void centralIntegrator(double *result, double h){
         double  x = LEFT_POINT;
         while (x < RIGHT_POINT){
                 if  (x+h*0.5 > RIGHT_POINT) break;
-                *result += f(x+0.5*h) * h;
+                *result += f(x+h/2) * h;
                 x += h;
                 //std::cout << "Central Integrator: " << result << std::endl;
         }
