@@ -128,7 +128,7 @@ void numIntMore(){
     
     double  adC0[iNum0] = {dCtrInt},
             adC1[iNum1],
-            adC2[iNum2] = {0, 0, 0};
+            adC2[iNum2];
 
     GKIntegrator2(adC1, adX1, fStepSize);
     GKIntegrator3(adC2, adX2, fStepSize);
@@ -136,11 +136,11 @@ void numIntMore(){
     double  dGKInt2 = adC1[0] + adC1[1],
             dGKInt3 = adC2[0] + adC2[1] + adC2[2];
     
-    std::cout << "Central Rectangles Integration Result: " << dCtrInt << std::endl;
-    std::cout << "Trapezoidal Rule Integration Result: " << dTrpInt << std::endl;
-    std::cout << "Gauss-Kristoffel 0 Integration Result: " << adC0[0] << std::endl;
-    std::cout << "Gauss-Kristoffel 1 Integration Result: " << dGKInt2 << std::endl;
-    std::cout << "Gauss-Kristoffel 2 Integration Result: " << dGKInt3 << std::endl;
+    std::cout << "Central Rectangles Integration Result: " << dCtrInt << "; Accuracy: " << abs(dCtrInt - 1) << std::endl;
+    std::cout << "Trapezoidal Rule Integration Result: " << dTrpInt << "; Accuracy: " << abs(dTrpInt - 1) << std::endl;
+    std::cout << "Gauss-Kristoffel 0 Integration Result: " << adC0[0] << "; Accuracy: " << abs(adC0[0] - 1) << std::endl;
+    std::cout << "Gauss-Kristoffel 1 Integration Result: " << dGKInt2 << "; Accuracy: " << abs(dGKInt2 - 1) << std::endl;
+    std::cout << "Gauss-Kristoffel 2 Integration Result: " << dGKInt3 << "; Accuracy: " << abs(dGKInt3 - 1) << std::endl;
 
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     c1->SetGrid();
