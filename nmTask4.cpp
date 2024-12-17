@@ -43,8 +43,8 @@ void simpleIterations(){
     // Define initial guess for x
     std::pair<double, double> pdX; // nitial guess for x
     std::vector<std::pair<double, double>> vpdSolutions; // every guess for solution
-    pdX.first = 0;
-    pdX.second = 0;
+    pdX.first = 0.375;
+    pdX.second = -0.75;
     vpdSolutions.push_back(pdX);
     int  i = 0;
     // Iterate until accuracy is reached or maximum number of iterations is reached (1000)
@@ -55,6 +55,7 @@ void simpleIterations(){
         vpdSolutions.push_back(pdXTemp);
         pdX.first = pdXTemp.first;
         pdX.second = pdXTemp.second;
+        std::cout << pdX.first << "; " << pdX.second << std::endl;
         if (maxValue(pdDelta) < dEpsilon) break; // Check for epsilon
     }
 
@@ -67,8 +68,15 @@ void simpleIterations(){
     // Plot results
     TCanvas *c1 = new TCanvas("c1", "Simple Iterations", 800, 600);
     c1->SetGrid();
+
+    double  dSolX[vpdSolutions.size()],
+            dSolY[vpdSolutions.size()];
+    for (int i = 0; i < vpdSolutions.size(); i++){
+        dSolX[i] = vpdSolutions[i].first;
+        dSolY[i] = vpdSolutions[i].second;
+    }
     
-    TGraph *sol = new TGraph(vpdSolutions.size(), &vpdSolutions[0].first, &vpdSolutions[0].second);
+    TGraph *sol = new TGraph(vpdSolutions.size(), dSolX, dSolY);
     sol->SetMarkerStyle(20);
     sol->SetMarkerColor(kBlue);
     sol->SetLineWidth(0);
@@ -92,8 +100,8 @@ void NewtonIterations(){
     // Define initial guess for x
     TMatrixD pdX (2, 1);
 
-    pdX(0, 0) = 0.1;
-    pdX(1, 0) = -1;
+    pdX(0, 0) = 0.375;
+    pdX(1, 0) = -0.75;
 
     //std::vector<TMatrixD> vpdSolutions;
     //vpdSolutions.push_back(pdX);
@@ -119,15 +127,24 @@ void NewtonIterations(){
         pdDelta = pdJacobian.Invert() * pdF;
 
         pdX -= pdDelta;
+        std::cout << pdX(0, 0) << "; " << pdX(1, 0) << std::endl;
         vpdSolutions.push_back(std::make_pair(pdX(0, 0), pdX(1, 0)));
         
         if (maxValue(pdDelta) < dEpsilon) break;
     }
 
+    double  dSolX [vpdSolutions.size()],
+            dSolY [vpdSolutions.size()];
+
+    for (int i = 0; i < vpdSolutions.size(); i++){
+        dSolX[i] = vpdSolutions[i].first;
+        dSolY[i] = vpdSolutions[i].second;
+    }
+
     TCanvas *c2 = new TCanvas("c2", "Newton Iterations", 800, 600);
     c2->SetGrid();
     
-    TGraph *sol = new TGraph(vpdSolutions.size(), &vpdSolutions[0].first, &vpdSolutions[0].second);
+    TGraph *sol = new TGraph(vpdSolutions.size(), dSolX, dSolY);
     sol->SetMarkerStyle(20);
     sol->SetMarkerColor(kBlue);
     sol->SetLineWidth(0);
