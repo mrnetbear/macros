@@ -350,12 +350,11 @@ int graph()
             TFile *oGrph = new TFile(rName.c_str(), "RECREATE");
             int i = 0;
             while (line != ".q"){
-                if (line == ".q")
-                    break;
                 cout << "Enter the sinogram path in the line" << endl << "> ";
                 cin >> line; //file path is requested here
                 cout << "---------------------" << endl << endl;
-                
+                if (line == ".q")
+                    break;
                 vector<double> r;
                 vector<double> theta;
 
@@ -365,10 +364,10 @@ int graph()
                 
                 std::string tag = "rootSinogram" + to_string(i++);
                 
-                TH2* sngrm = new TH2D(tag.c_str(), tag.c_str(), 64, -50, 50, 180, 0, 360);
+                TH2* sngrm = new TH2D(tag.c_str(), tag.c_str(), 31, 0, 180, 33, -50, 50);
                 for (int i = 0; i < theta.size(); i++) {
                     if (theta[i] >= 0)
-                        sngrm->Fill(r[i], theta[i]);
+                        sngrm->Fill(theta[i], r[i]);
                 }
 
                 sngrm->Write();
@@ -376,6 +375,40 @@ int graph()
                 //sngrm->Draw("colz");
                 //cin >> rName;
                 //delete sngrm; 
+            }
+            oGrph->Close();
+        }
+        else if (mode == "sin32"){
+            std::string line = "";
+            std::string rName = "rootSinogram32.root";
+            TFile *oGrph = new TFile(rName.c_str(), "RECREATE");
+            int i = 0;
+            while (line != ".q"){
+                cout << "Enter the sinogram path in the line" << endl << "> ";
+                cin >> line; //file path is requested here
+                cout << "---------------------" << endl << endl;
+                if (line == ".q")
+                    break;
+                vector<double> r;
+                vector<double> theta;
+
+                cFileOpen(line, r, theta);
+
+                cout << "Size: " << theta.size() << endl;
+                
+                std::string tag = "rootSinogram32" + to_string(i++);
+                
+                TH2* sngrm = new TH2D(tag.c_str(), tag.c_str(), 15, 0, 180, 17, -50, 50);
+                for (int i = 0; i < theta.size(); i++) {
+                    if (theta[i] >= 0)
+                        sngrm->Fill(theta[i], r[i]);
+                }
+
+                sngrm->Write();
+                
+                //sngrm->Draw("colz");
+                //cin >> rName;
+                //delete sngrm;
             }
             oGrph->Close();
         }
