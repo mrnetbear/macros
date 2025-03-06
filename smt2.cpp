@@ -5,35 +5,34 @@
 #include <iostream>
 
 void central_limit_theorem_check() {
-    // Параметры
-    const int nExperiments = 10000; // Количество экспериментов
-    const int nSamples = 1000;      // Количество случайных величин в каждом эксперименте
-    const double lambda = 1.0;      // Параметр экспоненциального распределения
+    //modelation parameters
+    const int nExperiments = 10000;
+    const int nSamples = 1000;
+    const double lambda = 1.0;
 
-    // Гистограммы
+    //Hists declaration
     TH1D *hSum = new TH1D("hSum", "Distribution of Sums", 100, 0, 0);
     TH1D *hNorm = new TH1D("hNorm", "Normalized Distribution of Sums", 100, -5, 5);
 
-    // Генератор случайных чисел
+    //Randomizer
     TRandom *rand = new TRandom();
 
-    // Основной цикл
     for (int i = 0; i < nExperiments; ++i) {
         double sum = 0.0;
         for (int j = 0; j < nSamples; ++j) {
-            sum += rand->Exp(lambda); // Генерация экспоненциально распределённой величины
+            sum += rand->Exp(lambda); //exponential distribution generation
         }
 
-        // Вычисление среднего и дисперсии для суммы
+        //mean and variance calculation
         double mean = nSamples / lambda;
         double variance = nSamples / (lambda * lambda);
 
-        // Заполнение гистограмм
+        //Hists Filling
         hSum->Fill(sum);
         hNorm->Fill((sum - mean) / TMath::Sqrt(variance));
     }
 
-    // Рисование гистограмм
+    // Drawing
     TCanvas *c1 = new TCanvas("c1", "Central Limit Theorem", 800, 400);
     c1->Divide(2, 1);
 
