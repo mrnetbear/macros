@@ -13,7 +13,7 @@ void monte_carlo_acception(){
     double n_samples = 1000000;
 
     for (size_t i = 0; i < n_samples; ++i){
-        double x = rand->Uniform(0, TMath::Pi()/2);
+        double x = rand->Uniform(0, TMath::Pi()/4);
         double y = rand->Uniform(0, 1);
 
         if (y < TMath::Cos(2*x))
@@ -24,3 +24,27 @@ void monte_carlo_acception(){
     c1->SaveAs("monte_carlo_acceptance.pdf");
 
 }
+
+void monte_carlo_reversed(){
+    TRandom3 *rand = new TRandom3(0);
+    
+    TH1D *hRev = new TH1D("h2", "Monte Carlo reversed method cos(2x)", 100, 0, TMath::Pi()/2);
+
+    double n_samples = 100000;
+
+    for (size_t i = 0; i < n_samples; ++i){
+        double r = rand->Uniform(0, 1);
+        double x = - acos(r) / 2.0 + TMath::Pi()/4; 
+        hRev->Fill(x);
+    }
+    TCanvas *c2 = new TCanvas("c2", "Monte Carlo acception method", 1200, 400);
+    hRev->Draw();
+    c2->SaveAs("monte_carlo_reverse.pdf");
+}
+
+int main(){
+    monte_carlo_acception();
+    monte_carlo_reversed();
+    return 0;
+}
+

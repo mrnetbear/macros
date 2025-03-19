@@ -39,7 +39,7 @@ void shov_filter(std::vector<double>& data){
     }
 }
 void shov_check(){
-    short n = 50;
+    short n = 500;
     std::vector<double> x;
 
     double  mean = 0.0,
@@ -69,7 +69,7 @@ void shov_check(){
     for (size_t i = 0; i < 70; ++i){
         double value = h1->GetBinCenter(i);
         double weight  = h1->GetBinContent(i);
-        var += (value - mean) * (value - mean) * weight / 50.0;
+        var += (value - mean) * (value - mean) * weight / n;
     }
     
     std::cout << "Mean = " << mean << "; Var = " << var << std::endl;

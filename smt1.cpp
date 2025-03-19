@@ -6,6 +6,8 @@
 #include "TRandom3.h"
 #include <iostream>
 
+#define t095 1.9602
+
 
 //t-criteria calculation
 double calculateTTest(double correlation, int nPoints) {
@@ -29,7 +31,7 @@ void manualLinearFit(double *x, double *y, int nPoints, double &a, double &b) {
 
 void randomDistribution() {
     TRandom3 rand;
-    const int nPoints = 1000;
+    const int nPoints = 100000;
 
     //arrays of points
     double x[nPoints], y[nPoints];
@@ -83,9 +85,12 @@ void randomDistribution() {
 
     double t1 = calculateTTest(corr1, nPoints);
 
-    std::cout << "Case 4: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "Case 1: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "t095 = " << (t095 < abs(t1) ? "OK!" : "NOPE!") << std::endl;
+    std::cout << "Ap function: y = " << a1 << "x + " << b1 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
 
-    
     TCanvas *c1 = new TCanvas("c1", "Case 1", 800, 600);
     h1->Draw("colz");
     f1->Draw("same L");
@@ -94,7 +99,7 @@ void randomDistribution() {
 void polynomialDistribution(){
     
     TRandom3 rand;
-    const int nPoints = 1000;
+    const int nPoints = 100000;
 
     //arrays of points
     double x[nPoints], y[nPoints];
@@ -146,7 +151,11 @@ void polynomialDistribution(){
 
     double t1 = calculateTTest(corr1, nPoints);
 
-    std::cout << "Case 4: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "Case 2: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "t095 = " << (t095 < abs(t1) ? "OK!" : "NOPE!") << std::endl;
+    std::cout << "Ap function: y = " << a2 << "x + " << b2 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
 
     TCanvas *c2 = new TCanvas("c2", "Case 2", 800, 600);
     h2->Draw("colz");
@@ -156,7 +165,7 @@ void polynomialDistribution(){
 void triangleDistribution(){
     
     TRandom3 rand;
-    const int nPoints = 10000;
+    const int nPoints = 100000;
 
     
     double x[nPoints], y[nPoints];
@@ -210,7 +219,11 @@ void triangleDistribution(){
 
     double t1 = calculateTTest(corr1, nPoints);
 
-    std::cout << "Case 4: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "Case 3: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "t095 = " << (t095 < abs(t1) ? "OK!" : "NOPE!") << std::endl;
+    std::cout << "Ap function: y = " << a3 << "x + " << b3 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
 
     
     TCanvas *c3 = new TCanvas("c3", "Case 3", 800, 600);
@@ -221,7 +234,7 @@ void triangleDistribution(){
 void circleDistribution(){
   
     TRandom3 rand;
-    const int nPoints = 1000;
+    const int nPoints = 100000;
 
    
     double x[nPoints], y[nPoints];
@@ -272,7 +285,11 @@ void circleDistribution(){
 
     double t1 = calculateTTest(corr1, nPoints);
 
+    std::cout << "---------------------------------------------" << std::endl;
     std::cout << "Case 4: Covariance = " << cov1 << ", Correlation = " << corr1 << ", t-statistic = " << t1 << std::endl;
+    std::cout << "t095 = " << (t095 < abs(t1) ? "OK!" : "NOPE!") << std::endl;
+    std::cout << "Ap function: y = " << a4 << "x + " << b4 << std::endl;
+    std::cout << "---------------------------------------------" << std::endl;
 
 
    
