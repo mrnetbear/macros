@@ -9,18 +9,24 @@
 #include <vector>
 #include <algorithm>
 
+//shovene filter
 void shov_filter(std::vector<double>& data){
     double mean = 0;
     double stddev = 0;
+
+    //mean calculation
     for (double val : data) {
         mean += val;
     }
-    mean /= data.size();
+    mean /= data.size(); 
+
+    //stddev calculation
     for (double val : data) {
         stddev += pow(val - mean, 2);
     }
     stddev = sqrt(stddev / data.size());
 
+    //shovene algorythm
     auto it = data.begin();
     while (it != data.end()) {
         double z = fabs((*it - mean) / stddev);

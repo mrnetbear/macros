@@ -14,6 +14,19 @@ double calculateTTest(double correlation, int nPoints) {
     double t = correlation * TMath::Sqrt(nPoints - 2) / TMath::Sqrt(1 - correlation * correlation);
     return t;
 }
+
+void manualLinearFit(double *x, double *y, int nPoints, double &a, double &b) {
+    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (int i = 0; i < nPoints; ++i) {
+        sumX += x[i];
+        sumY += y[i];
+        sumXY += x[i] * y[i];
+        sumX2 += x[i] * x[i];
+    }
+    a = (nPoints * sumXY - sumX * sumY) / (nPoints * sumX2 - sumX * sumX);
+    b = (sumY - a * sumX) / nPoints;
+}
+
 void randomDistribution() {
     TRandom3 rand;
     const int nPoints = 1000;
@@ -33,10 +46,13 @@ void randomDistribution() {
         h1->Fill(x[i], y[i]);
     }
 
+    //linear fit calculation
+    double a1, b1;
+    manualLinearFit(x, y, nPoints, a1, b1);
+
     //approximmation construction
-    TGraph *g1 = new TGraph(nPoints, x, y);
     TF1 *f1 = new TF1("f1", "[0]+[1]*x", -5, 5);
-    g1->Fit(f1);
+    f1->SetParameters(a1, b1);
 
     //covariation and correlation calculation
     double cov1 = 0, corr1 = 0;
@@ -72,7 +88,7 @@ void randomDistribution() {
     
     TCanvas *c1 = new TCanvas("c1", "Case 1", 800, 600);
     h1->Draw("colz");
-    g1->Draw("same P");
+    f1->Draw("same L");
 }
 
 void polynomialDistribution(){
@@ -95,10 +111,13 @@ void polynomialDistribution(){
         h2->Fill(x[i], y[i]);
     }
 
-    //approximation construction
-    TGraph *g2 = new TGraph(nPoints, x, y);
-    TF1 *f2 = new TF1("f1", "[0]+[1]*x", -5, 5);
-    g2->Fit(f2);
+    //linear fit calculation
+    double a2, b2;
+    manualLinearFit(x, y, nPoints, a2, b2);
+
+    //approximmation construction
+    TF1 *f2 = new TF1("f2", "[0]+[1]*x", -5, 5);
+    f2->SetParameters(a2, b2);
 
     //covariation and correlation calculation
     double cov1 = 0, corr1 = 0;
@@ -131,7 +150,7 @@ void polynomialDistribution(){
 
     TCanvas *c2 = new TCanvas("c2", "Case 2", 800, 600);
     h2->Draw("colz");
-    g2->Draw("same P");
+    f2->Draw("same L");
 }
 
 void triangleDistribution(){
@@ -156,9 +175,13 @@ void triangleDistribution(){
     }
 
     
-    TGraph *g3 = new TGraph(nPoints, x, y);
-    TF1 *f3 = new TF1("f1", "[0]+[1]*x", 0, 10);
-    g3->Fit(f3);
+    //linear fit calculation
+    double a3, b3;
+    manualLinearFit(x, y, nPoints, a3, b3);
+
+    //approximmation construction
+    TF1 *f3 = new TF1("f3", "[0]+[1]*x", 0, 10);
+    f3->SetParameters(a3, b3);
 
     
     double cov1 = 0, corr1 = 0;
@@ -192,7 +215,7 @@ void triangleDistribution(){
     
     TCanvas *c3 = new TCanvas("c3", "Case 3", 800, 600);
     h3->Draw("colz");
-    g3->Draw("same P");
+    f3->Draw("same L");
 }
 
 void circleDistribution(){
@@ -217,9 +240,13 @@ void circleDistribution(){
     }
 
   
-    TGraph *g4 = new TGraph(nPoints, x, y);
-    TF1 *f4 = new TF1("f1", "[0]+[1]*x", -5, 5);
-    g4->Fit(f4);
+    //linear fit calculation
+    double a4, b4;
+    manualLinearFit(x, y, nPoints, a4, b4);
+
+    //approximmation construction
+    TF1 *f4 = new TF1("f3", "[0]+[1]*x", -5, 5);
+    f4->SetParameters(a4, b4);
 
    
     double cov1 = 0, corr1 = 0;
@@ -251,7 +278,7 @@ void circleDistribution(){
    
     TCanvas *c4 = new TCanvas("c4", "Case 4", 800, 600);
     h4->Draw("colz");
-    g4->Draw("same P");
+    f4->Draw("same L");
 }
 
 int main() {

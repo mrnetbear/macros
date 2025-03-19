@@ -47,5 +47,5 @@ void central_limit_theorem_check() {
     hNorm->SetYTitle("Counts");
 
     // Сохранение в файл
-    c1->SaveAs("central_limit_theorem_check.png");
+    c1->SaveAs("central_limit_theorem_check.pdf");
 }
