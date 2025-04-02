@@ -72,19 +72,20 @@ void shov_check(){
         var += (value - mean) * (value - mean) * weight / n;
     }
     
-    std::cout << "Mean = " << mean << "; Var = " << var << std::endl;
+    std::cout << "Mean = " << mean << "; Var = " << sqrt(var) << std::endl;
     
-    TF1 *gaus = new TF1("gaus", "gaus", 80, 120);
-    gaus->SetParameters(1000, mean, TMath::Sqrt(var));
-    h1->Fit("gaus", "Q");
+    TF1 *gaus1 = new TF1("gaus1", "gaus", 80, 120);
+    gaus1->SetParameters(52.1, mean, TMath::Sqrt(var));
+    //h1->Fit("gaus", "Q");
 
     double chi2 = 0.0;
     int ndf = 0;
     for (size_t i = 0; i < h1->GetNbinsX(); ++i){
-        double observed = h1->GetBinCenter(i);
-        double expected = gaus->Eval(h1->GetBinCenter(i));
-        if (expected){
-            chi2 += (observed - expected) * (observed - expected) / expected;
+        double observed = h1->GetBinContent(i);
+        double expected = gaus1->Eval(h1->GetBinCenter(i));
+        if (observed){
+            //chi2 += (observed - expected) * (observed - expected) / expected;
+            chi2 += (observed - expected) * (observed - expected) / observed;
             ndf++;
         }
     }
@@ -112,30 +113,31 @@ void shov_check(){
         mean += x[i];
     }
 
-    mean /= n;
+    mean /= h2->GetEntries();
     var = 0.0;
 
     for (size_t i = 0; i < h2->GetNbinsX(); ++i){
         double value = h2->GetBinCenter(i);
         double weight  = h2->GetBinContent(i);
-        var += (value - mean) * (value - mean) * weight / x.size();
+        var += (value - mean) * (value - mean) * weight / h2->GetEntries();
     }
 
-    std::cout << "Mean = " << mean << "; Var = " << var << std::endl;
+    std::cout << "Mean = " << mean << "; Var = " << sqrt(var) << std::endl;
 
-    TF1 *gaus1 = new TF1("gaus1", "gaus", 80, 120);
+    TF1 *gaus2 = new TF1("gaus2", "gaus", 80, 120);
 
-    gaus1->SetParameters(1000, mean, TMath::Sqrt(var));
-    h2->Fit("gaus", "Q");
+    gaus2->SetParameters(52.1, mean, TMath::Sqrt(var));
+    //h2->Fit("gaus", "Q");
 
     chi2 = 0.0;
     ndf = 0;
 
     for (size_t i = 0; i < h2->GetNbinsX(); ++i){
-        double observed = h2->GetBinCenter(i);
-        double expected = gaus->Eval(h2->GetBinCenter(i));
-        if (expected){
-            chi2 += (observed - expected) * (observed - expected) / expected;
+        double observed = h2->GetBinContent(i);
+        double expected = gaus2->Eval(h2->GetBinCenter(i));
+        if (observed){
+            //chi2 += (observed - expected) * (observed - expected) / expected;
+            chi2 += (observed - expected) * (observed - expected) / observed;
             ndf++;
         }
     }
@@ -148,8 +150,14 @@ void shov_check(){
     c1->Divide(2, 1);
     c1->cd(1);
     h1->Draw();
+    h1->Fit("gaus");
+    gaus1->SetLineColor(kGreen);
+    gaus1->Draw("same L");
     c1->cd(2);
     h2->Draw();
+    h2->Fit("gaus");
+    gaus2->SetLineColor(kGreen);  
+    gaus2->Draw("same L");
     c1->SaveAs("shov_check.pdf");
 
 
