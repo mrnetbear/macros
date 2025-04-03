@@ -38,8 +38,10 @@ void monte_carlo_reversed(){
         double x = - acos(r) / 2.0 + TMath::Pi()/4; 
         hRev->Fill(x);
     }
+    TF1* frev = new TF1("frev", "cos(2*x)*31000", 0, TMath::Pi()/4);
     TCanvas *c2 = new TCanvas("c2", "Monte Carlo acception method", 1200, 400);
     hRev->Draw();
+    frev->Draw("samel");
     c2->SaveAs("monte_carlo_reverse.pdf");
 }
 

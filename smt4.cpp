@@ -45,8 +45,8 @@ void shov_check(){
     double  mean = 0.0,
             meanSquare = 0.0;
     std::fstream file("chi2task_v4.dat");
-    TH1D *h1 = new TH1D("h1", "Experimental distribution, no filters", 70, 80, 120);
-    TH1D *h2 = new TH1D("h2", "Experimental distribution + shov", 70, 80, 120);
+    TH1D *h1 = new TH1D("h1", "Experimental distribution, no filters", 50, 70, 120);
+    TH1D *h2 = new TH1D("h2", "Experimental distribution + shov", 50, 80, 120);
 
     TCanvas *c1 = new TCanvas("c1", "Experimental distributions", 1200, 400); 
     for (size_t i = 0; i < n; ++i){
@@ -74,13 +74,13 @@ void shov_check(){
     
     std::cout << "Mean = " << mean << "; Var = " << sqrt(var) << std::endl;
     
-    TF1 *gaus1 = new TF1("gaus1", "gaus", 80, 120);
-    gaus1->SetParameters(52.1, mean, TMath::Sqrt(var));
+    TF1 *gaus1 = new TF1("gaus1", "gaus", 70, 120);
+    gaus1->SetParameters(52.71, mean, TMath::Sqrt(var));
     //h1->Fit("gaus", "Q");
 
     double chi2 = 0.0;
     int ndf = 0;
-    for (size_t i = 0; i < h1->GetNbinsX(); ++i){
+    for (size_t i = 1; i <= h1->GetNbinsX(); ++i){
         double observed = h1->GetBinContent(i);
         double expected = gaus1->Eval(h1->GetBinCenter(i));
         if (observed){
@@ -116,7 +116,7 @@ void shov_check(){
     mean /= h2->GetEntries();
     var = 0.0;
 
-    for (size_t i = 0; i < h2->GetNbinsX(); ++i){
+    for (size_t i = 1; i <= h2->GetNbinsX(); ++i){
         double value = h2->GetBinCenter(i);
         double weight  = h2->GetBinContent(i);
         var += (value - mean) * (value - mean) * weight / h2->GetEntries();
@@ -126,7 +126,7 @@ void shov_check(){
 
     TF1 *gaus2 = new TF1("gaus2", "gaus", 80, 120);
 
-    gaus2->SetParameters(52.1, mean, TMath::Sqrt(var));
+    gaus2->SetParameters(53.96, mean, TMath::Sqrt(var));
     //h2->Fit("gaus", "Q");
 
     chi2 = 0.0;
@@ -150,12 +150,12 @@ void shov_check(){
     c1->Divide(2, 1);
     c1->cd(1);
     h1->Draw();
-    h1->Fit("gaus");
+    h1->Fit("gaus", "L");
     gaus1->SetLineColor(kGreen);
     gaus1->Draw("same L");
     c1->cd(2);
     h2->Draw();
-    h2->Fit("gaus");
+    h2->Fit("gaus", "L");
     gaus2->SetLineColor(kGreen);  
     gaus2->Draw("same L");
     c1->SaveAs("shov_check.pdf");
