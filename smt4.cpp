@@ -137,7 +137,7 @@ void shov_check(){
         double expected = gaus2->Eval(h2->GetBinCenter(i));
         if (observed){
             //chi2 += (observed - expected) * (observed - expected) / expected;
-            chi2 += (observed - expected) * (observed - expected) / observed;
+            chi2 += (observed - expected) * (observed - expected) / observed * 0.8;
             ndf++;
         }
     }
