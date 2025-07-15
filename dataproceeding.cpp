@@ -23,6 +23,7 @@
 #include "TDecompLU.h"
 #include "TMultiGraph.h"
 
+//Fast-Furier transformation
 void FFT(const double* input_data, double* output_dataRe, double* output_dataIm, size_t len){
     for (size_t i = 0; i < len; ++i){
         output_dataRe[i] = 0;
@@ -34,8 +35,9 @@ void FFT(const double* input_data, double* output_dataRe, double* output_dataIm,
     }
 }
 
+//Data pocessing function
 int dataProcessing(){
-    std::cout << "Beginning..." << std::endl;
+    //Data reading
     std::fstream readfile;
     std::string filename = "timeCh2Hist.txt";
     readfile.open(filename, std::ios::in);
@@ -45,6 +47,8 @@ int dataProcessing(){
         data.push_back(stod(clipboard));
     }
     readfile.close();
+
+    //Visualizating data
     TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", 50, -2000, -1300);
     for (auto a : data){
         timeHist->Fill(a);
@@ -55,8 +59,7 @@ int dataProcessing(){
     timeHist->SetYTitle("Entries");
     timeHist->Draw();
 
-    std::cout << "This is done! Continuing..." << std::endl;
-
+    //////////Furier processing//////////
     const size_t num_signals = 1087;
     const size_t signal_length = 1002;
     std::vector<std::vector<double>> signals(num_signals, std::vector<double>(signal_length));
@@ -64,18 +67,17 @@ int dataProcessing(){
     std::vector<std::vector<double>> furier_transformedIm(num_signals, std::vector<double>(signal_length));
 
 
+    //Reading data
     std::fstream furier_data;
     for (size_t i = 0; i < num_signals; ++i){
         std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---" + std::to_string(i+1) + ".txt";
         furier_data.open(furier_filename, std::ios::in);
         std::string strBuf;
         size_t j = 0;
-        //std::vector <double> temp;
         for (size_t j = 0; j < signal_length && std::getline(furier_data, strBuf); ++j) {
             signals[i][j] = (stod(strBuf));
 
         }
-        //signals.push_back(temp);
         furier_data.close();
     }
 
@@ -86,7 +88,7 @@ int dataProcessing(){
     std::cout << "Success! Beginning Grid-Stride loop..." << std::endl; 
     //////////grid-stride loop////////////
     
-    // Многопоточная обработка
+    // Multi-threaded processing
     const size_t num_threads = std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
     threads.reserve(num_threads);
@@ -110,6 +112,7 @@ int dataProcessing(){
     }
 
 
+    //Data visualization
     TH1D *furier_spectreRe = new TH1D("furier_spectreRe", "Furier Re Spectre on Ch2", 100, -3500, 4500);
     TH1D *furier_spectreIm = new TH1D("furier_spectreIm", "Furier Im Spectre on Ch2", 100, -3500, 3500);
 
