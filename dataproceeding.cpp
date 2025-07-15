@@ -39,7 +39,7 @@ void FFT(const double* input_data, double* output_dataRe, double* output_dataIm,
 int dataProcessing(){
     //Data reading
     std::fstream readfile;
-    std::string filename = "timeCh2Hist.txt";
+    std::string filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh3Hist@-30.txt";
     readfile.open(filename, std::ios::in);
     std::vector <double> data;
     std::string clipboard;
@@ -49,7 +49,8 @@ int dataProcessing(){
     readfile.close();
 
     //Visualizating data
-    TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", 50, -2000, -1300);
+    //TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", 50, -2000, -1300);
+    TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", 50, 200, 1300);
     for (auto a : data){
         timeHist->Fill(a);
         std::cout << a << std::endl;
@@ -60,8 +61,10 @@ int dataProcessing(){
     timeHist->Draw();
 
     //////////Furier processing//////////
-    const size_t num_signals = 1087;
-    const size_t signal_length = 1002;
+    //const size_t num_signals = 1087;
+    //const size_t signal_length = 1002;
+    const size_t num_signals = 2005;
+    const size_t signal_length = 748;
     std::vector<std::vector<double>> signals(num_signals, std::vector<double>(signal_length));
     std::vector<std::vector<double>> furier_transformedRe(num_signals, std::vector<double>(signal_length));
     std::vector<std::vector<double>> furier_transformedIm(num_signals, std::vector<double>(signal_length));
@@ -70,7 +73,8 @@ int dataProcessing(){
     //Reading data
     std::fstream furier_data;
     for (size_t i = 0; i < num_signals; ++i){
-        std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---" + std::to_string(i+1) + ".txt";
+        //std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---" + std::to_string(i+1) + ".txt";
+        std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@-30/C3---" + std::to_string(i+1) + ".txt";
         furier_data.open(furier_filename, std::ios::in);
         std::string strBuf;
         size_t j = 0;
@@ -117,8 +121,10 @@ int dataProcessing(){
     TH1D *furier_spectreIm = new TH1D("furier_spectreIm", "Furier Im Spectre on Ch2", 100, -3500, 3500);
 
     for (size_t i = 0; i < signal_length; ++i){
+        if (abs(furier_transformedRe[0][i]) > 50){
         furier_spectreRe->Fill(furier_transformedRe[0][i]);
         furier_spectreIm->Fill(furier_transformedIm[0][i]);
+        }
     }
 
     TCanvas *c2 = new TCanvas("c2", "furier Spectre", 1024, 768);
