@@ -49,7 +49,7 @@ void ParallelFFT(
 
     size_t N = signals[0].size();
     size_t N_padded = 1;
-    while (N_padded < N) N_padded <<= 2;
+    while (N_padded < N) N_padded <<= 1;
 
     //////////////grid-stride loop//////////////
 
