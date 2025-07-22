@@ -25,22 +25,142 @@
 #include "TMultiGraph.h"
 #include "FFT/FFT.hpp"
 
+bool timeFileRead(std::string filename, std::vector<double>& data, double mean) {
+
+    return true;
+}
+
 //Data pocessing function
 int dataProcessing(){
+
+    std::cout << "Choose state: ";
+    short state;
+    std::cin >> state;
     //Data reading
     std::fstream readfile;
-    std::string filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOA.txt"; //20 degrees
-    //std::string filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh3Hist@-30.txt"; //-30 degrees
+    std::string filename;
 
-    double  mean = 0.0,
-            meanSquare = 0.0;
-    readfile.open(filename, std::ios::in);
+    TH1D* timeHist;
+    size_t nBins = 100;
+
+    size_t num_signals;
+    size_t signal_length;
+    double tstep;
+
+    std::string furierRootFolder;
+    
+    try{
+        switch (state){
+            case 0: //20 degrees
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOA.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA@20degrees (board 9)", nBins, 1600, 2600);
+                num_signals = 1087;
+                signal_length = 1002;
+                tstep = 50e-12;
+                break;
+            case 1: //-30 degrees
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh3Hist@-30.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@-30/C3---";
+                timeHist = new TH1D("timeHist", "#Delta TOA@minus30degrees (9 board)", nBins, 200, 1300);
+                num_signals = 2006;
+                signal_length = 2002;
+                tstep = 50e-12;
+                break;
+            case 2: //no_hybird_HPKHV180
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOAno_hybird_HPKHV180.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV180/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 0, 2400);
+                num_signals = 3335;
+                signal_length = 8002;
+                tstep = 50e-12;
+                break;
+            case 3: //no_hybrid_HPKHV190
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOAno_hybird_HPKHV190.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV190/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 1200, 2400);
+                num_signals = 3335;
+                signal_length = 8002;
+                tstep = 50e-12;
+                break;
+            case 45:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV180_HPKHV180/r5/timeHistDeltaTOA23hybridHV180_HPKHV180.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV180_HPKHV180/r5/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 4500, 7000);
+                num_signals = 146;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 55:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV175_HPKHV180/r5/timeHistDeltaTOA23hybridHV175_HPKHV180.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV175_HPKHV180/r5/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 4500, 7000);
+                num_signals = 150;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 65:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV170_HPKHV180/r5/timeHistDeltaTOA23hybridHV170_HPKHV180.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV170_HPKHV180/r7/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 4500, 7000);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 7:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV190/timeHistDeltaTOA2320degree_HV190.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV190/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 700, 1700);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 8:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV180/timeHistDeltaTOA2320degree_HV180.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV180/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 700, 1700);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 9:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV200/timeHistDeltaTOA2320degree_HV200.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/20degree_HV200/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 700, 1700);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 10:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/minus30degree_HV160/timeHistDeltaTOA23minus30degree_HV160.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybridHV170_HPKHV180/r7/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 700, 1700);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            case 11:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/minus30degree_HV170/timeHistDeltaTOA23minus30degree_HV170.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/minus30degree_HV170/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", 500, 700, 1700);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
+            default: 
+                throw std::invalid_argument("Error 9: Invalid binary digit: " + std::to_string(state));
+        }
+    }catch(const std::invalid_argument& e) { //catching incorrect symbol exception 
+                std::cerr << e.what() << '\n';
+                return 9;
+    }
+    double  mean = 0.0;
     std::vector <double> data;
+    readfile.open(filename, std::ios::in);
     std::string clipboard;
     while (std::getline(readfile, clipboard)) {
         data.push_back(stod(clipboard));
         mean += stod(clipboard);
-        meanSquare += stod(clipboard) * stod(clipboard);
     }
     readfile.close();
 
@@ -51,9 +171,6 @@ int dataProcessing(){
     double var = 0.0;
 
     //Visualizating data
-    size_t nBins = 100;
-    TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", nBins, -2000, -1300); //20 degrees
-    //TH1D* timeHist = new TH1D("timeHist", "#Delta TOA", 50, 200, 1300); //-30 degrees
     for (auto a : data){
         timeHist->Fill(a);
     }
@@ -72,18 +189,13 @@ int dataProcessing(){
     timeHist->Draw();
 
     //////////Furier processing//////////
-    const size_t num_signals = 1087; //20 degrees
-    const size_t signal_length = 1002; //20 degrees
-    //const size_t num_signals = 2007; //-30 degrees
-    //const size_t signal_length = 748; // -30 degrees
     std::vector<std::vector<double>> signals(num_signals, std::vector<double>(signal_length));
 
 
     //Reading data
     std::fstream furier_data;
     for (size_t i = 0; i < num_signals; ++i){
-        std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---" + std::to_string(i+1) + ".txt"; //20 degrees
-        //std::string furier_filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@-30/C3---" + std::to_string(i+1) + ".txt"; //-30 degrees
+        std::string furier_filename = furierRootFolder + std::to_string(i+1) + ".txt";
         furier_data.open(furier_filename, std::ios::in);
         std::string strBuf;
         size_t j = 0;
@@ -98,21 +210,27 @@ int dataProcessing(){
     //////////grid-stride loop////////////
     
     // Multi-threaded processing
-    std::vector<std::vector<Complex>> fft_results(num_signals);
+    //std::vector<std::vector<Complex>> fft_results(num_signals);
+    std::vector<std::vector<Complex>> fft_results(1);
+    std::vector<std::vector<double>> fft_signal_test;
+    fft_signal_test.push_back(signals[0]);
     const size_t num_threads = std::thread::hardware_concurrency();
-    ParallelFFT(signals, fft_results, num_threads);
+    //ParallelFFT(signals, fft_results, num_threads);
+    ParallelFFT(fft_signal_test, fft_results, num_threads);
 
     //Data visualization
-    double sampling_rate = 2e10;
+    double sampling_rate = 1 / tstep;
+
     TH1D *amplitude_spectrum = new TH1D(
         "amplitude", 
         "Amplitude Spectrum; Frequency (Hz); Amplitude", 
-        signal_length / 2, 0, sampling_rate / 2
+        100, 0, sampling_rate/64
     );
 
-    for (size_t i = 0; i < signal_length / 2; ++i) {
+    for (size_t i = 0; i < signal_length/2; ++i) {
         double freq = i * sampling_rate / signal_length;
-        double amp = std::abs(fft_results[0][i]);
+        double amp = std::abs(fft_results[0][i]) / signal_length;
+        (amp < 1) ? amp = 0 : amp;
         amplitude_spectrum->Fill(freq, amp);
     }
     TCanvas *c2 = new TCanvas("c2", "Amplitude Spectrum", 800, 600);

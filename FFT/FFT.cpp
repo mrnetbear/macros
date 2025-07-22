@@ -1,29 +1,34 @@
 #include "FFT.hpp"
 
-using Complex = std::complex<double>;
-
-
 //Fast-Furier transformation
-void FFT(std::vector<Complex>& x){
+void FFT(std::vector<Complex>& x) {
     const size_t N = x.size();
     if (N <= 1) return;
-    
+
+    //Separating data
     std::vector<Complex> even(N/2), odd(N/2);
-    for (size_t i = 0; i < N / 2; ++i){
-        even[i] = x[2 * i];
-        odd[i] = x[2 * i + 1];
+    for (size_t i = 0; i < N/2; ++i) {
+        even[i] = x[2*i];
+        odd[i] = x[2*i + 1];
     }
 
+    //Recource FFT call
     FFT(even);
     FFT(odd);
 
-    for (size_t k = 0; k < N / 2; ++k) {
-        Complex t = std::polar(1.0, -2 * M_PI * k / N) * odd[k];
+    //FFT procedure
+    for (size_t k = 0; k < N/2; ++k) {
+        Complex t = std::exp(Complex(0, -2 * M_PI * k / N)) * odd[k];
         x[k] = even[k] + t;
-        x[k + N / 2] = even[k] - t;
+        if (abs(x[k].real()) < 1e-10) x[k].real(0);
+        if (abs(x[k].imag()) < 1e-10) x[k].imag(0);
+        x[k + N/2] = even[k] - t;
+        if (abs(x[k + N/2].real()) < 1e-10) x[k + N/2].real(0);
+        if (abs(x[k + N/2].imag()) < 1e-10) x[k + N/2].imag(0);
     }
 }
 
+//one-thread FFT call
 void ProcessSignal( const std::vector<double>& input,
     std::vector<Complex>& output,
     size_t signal_length_padded
@@ -43,7 +48,7 @@ void ParallelFFT(
     const std::vector<std::vector<double>>& signals,
     std::vector<std::vector<Complex>>& fft_results,
     size_t num_threads
-){
+) {
     const size_t num_signals = signals.size();
     fft_results.resize(num_signals);
 
@@ -51,24 +56,19 @@ void ParallelFFT(
     size_t N_padded = 1;
     while (N_padded < N) N_padded <<= 1;
 
-    //////////////grid-stride loop//////////////
-
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < num_signals; i += num_threads) {
-        for (size_t t = 0; t < num_threads && (i + t) < num_signals; ++t) {
-            size_t idx = i + t;
-            threads.emplace_back(
-                ProcessSignal,
-                std::cref(signals[idx]),
-                std::ref(fft_results[idx]),
-                N_padded
-            );
-        }
+    threads.reserve(num_threads);
 
-        // thread join
-        for (auto& thread : threads) {
-            if (thread.joinable()) thread.join();
-        }
-        threads.clear();
+    for (size_t t = 0; t < num_threads; ++t) {
+        threads.emplace_back([&, t, N_padded]() {
+            for (size_t i = t; i < num_signals; i += num_threads) {
+                ProcessSignal(signals[i], fft_results[i], N_padded);
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        if (thread.joinable()) thread.join();
     }
 }
+
