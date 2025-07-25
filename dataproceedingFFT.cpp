@@ -25,9 +25,26 @@
 #include "TMultiGraph.h"
 #include "FFT/FFT.hpp"
 
-bool timeFileRead(std::string filename, std::vector<double>& data, double mean) {
+void timeFileRead(std::string filename, std::vector<double>& data, double& mean) {
+    std::cout << "Reading file: " << filename << std::endl;
+    std::fstream readfile;
+    readfile.open(filename, std::ios::in);
+    std::string clipboard;
+    while (std::getline(readfile, clipboard)) {
+        data.push_back(stod(clipboard));
+        mean += stod(clipboard);
+        if (std::isnan(mean)) {
+            throw std::invalid_argument("Error 1: Invalid data in file: " + filename);
+        }
+        std::cout << "Read value: " << stod(clipboard) << std::endl;
+        std::cout << "Write value: " << data[data.size()-1] << std::endl;
+    }
+    readfile.close();
 
-    return true;
+    sort(data.begin(), data.end());
+    short n = data.size();
+    mean = mean / n;
+    std::cout << "Mean value: " << mean << std::endl;
 }
 
 //Data pocessing function
@@ -37,7 +54,6 @@ int dataProcessing(){
     short state;
     std::cin >> state;
     //Data reading
-    std::fstream readfile;
     std::string filename;
 
     TH1D* timeHist;
@@ -52,7 +68,7 @@ int dataProcessing(){
     try{
         switch (state){
             case 0: //20 degrees
-                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOA.txt";
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/timeCh2HistDeltaTOA.txt";
                 furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed/C2---";
                 timeHist = new TH1D("timeHist", "#Delta TOA@20degrees (board 9)", nBins, 1600, 2600);
                 num_signals = 1087;
@@ -62,13 +78,13 @@ int dataProcessing(){
             case 1: //-30 degrees
                 filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh3Hist@-30.txt";
                 furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@-30/C3---";
-                timeHist = new TH1D("timeHist", "#Delta TOA@minus30degrees (9 board)", nBins, 200, 1300);
+                timeHist = new TH1D("timeHist", "#Delta TOA@minus30degrees (board 9)", nBins, 200, 1300);
                 num_signals = 2006;
                 signal_length = 2002;
                 tstep = 50e-12;
                 break;
             case 2: //no_hybird_HPKHV180
-                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOAno_hybird_HPKHV180.txt";
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV180/timeCh2HistDeltaTOAno_hybird_HPKHV180.txt";
                 furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV180/C2---";
                 timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 0, 2400);
                 num_signals = 3335;
@@ -76,7 +92,7 @@ int dataProcessing(){
                 tstep = 50e-12;
                 break;
             case 3: //no_hybrid_HPKHV190
-                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/timeCh2HistDeltaTOAno_hybird_HPKHV190.txt";
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV190/timeCh2HistDeltaTOAno_hybird_HPKHV190.txt";
                 furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@no_hybird_HPKHV190/C2---";
                 timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 1200, 2400);
                 num_signals = 3335;
@@ -147,6 +163,14 @@ int dataProcessing(){
                 signal_length = 8002;
                 tstep = 12e-12;
                 break;
+            case 12:
+                filename = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@hybrid_measurements/115_460/c5/r6/timeHistDeltaTOA23.txt";
+                furierRootFolder = "/Users/mcsquare/Documents/Работа/2024-2025/FuSEP2025/code/Data_to_Proceed@calibration_7_18/minus30degree_HV170/C2---";
+                timeHist = new TH1D("timeHist", "#Delta TOA", nBins, 8000, 10000);
+                num_signals = 502;
+                signal_length = 8002;
+                tstep = 12e-12;
+                break;
             default: 
                 throw std::invalid_argument("Error 9: Invalid binary digit: " + std::to_string(state));
         }
@@ -155,25 +179,25 @@ int dataProcessing(){
                 return 9;
     }
     double  mean = 0.0;
-    std::vector <double> data;
-    readfile.open(filename, std::ios::in);
-    std::string clipboard;
-    while (std::getline(readfile, clipboard)) {
-        data.push_back(stod(clipboard));
-        mean += stod(clipboard);
+    std::vector<double> data;
+    try{timeFileRead(filename, data, mean);}
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Error reading file: " << e.what() << std::endl;
+        return 1;
     }
-    readfile.close();
 
-    sort(data.begin(), data.end());
-    short n = data.size();
-    mean = mean / n;
-
+    if (data.empty()) {
+        std::cerr << "Error: No data read from file." << std::endl;
+        return 2;
+    }
     double var = 0.0;
 
     //Visualizating data
     for (auto a : data){
         timeHist->Fill(a);
     }
+
+    size_t n = data.size();
 
     for (size_t i = 0; i < 100; ++i){
         double value = timeHist->GetBinCenter(i);
