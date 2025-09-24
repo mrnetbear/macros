@@ -274,13 +274,13 @@ void readWaveformPsd(const char* inputFile, const char* outputFile = "psdWavefor
 }
 
 void test() {
-    const char* inputDataFilename = "/usr/local/Cellar/root/6.32.08/share/root/macros/Digitizer/data_psd_2025_07_18__16_47_59.bin";
-    const char* outputDataFilename = "/usr/local/Cellar/root/6.32.08/share/root/macros/Digitizer/psdData_3.root";
+    const char* inputDataFilename = "/usr/local/Cellar/root/build/macros/Digitizer/data_psd_2025_07_18__16_47_59.bin";
+    const char* outputDataFilename = "/usr/local/Cellar/root/build/macros/Digitizer/psdData_3.root";
     
     readPsdData(inputDataFilename, outputDataFilename);
 
-    const char* inputWaveformFilename = "/usr/local/Cellar/root/6.32.08/share/root/macros/Digitizer/waveform_psd_2025_07_18__16_47_59.bin";
-    const char* outputWaveformFilename = "/usr/local/Cellar/root/6.32.08/share/root/macros/Digitizer/psdWaveform_3.root";
+    const char* inputWaveformFilename = "/usr/local/Cellar/root/build/macros/Digitizer/waveform_psd_2025_07_18__16_47_59.bin";
+    const char* outputWaveformFilename = "/usr/local/Cellar/root/build/macros/Digitizer/psdWaveform_3.root";
     
     readWaveformPsd(inputWaveformFilename, outputWaveformFilename);
 
